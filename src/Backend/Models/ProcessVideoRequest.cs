@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Text.Json.Serialization;
+using System;
 
 namespace backend.Models
 {
@@ -19,5 +20,11 @@ namespace backend.Models
 
         [JsonPropertyName("deployment_id")]
         public string DeploymentId { get; set; }
+
+        [JsonPropertyName("processing_id")]
+        public string ProcessingId { get; set; }
+
+        [JsonPropertyName("timestamp")]
+        public DateTimeOffset Timestamp { get; set; }
     }
 }

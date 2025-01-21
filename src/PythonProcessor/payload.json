@@ -1,0 +1,35 @@
+{
+    "exercise": "shotput",
+    "video_url": "https://athleticstorage.blob.core.windows.net/uploads/stage2.mp4?sp=racwti&st=2025-01-21T11:52:20Z&se=2025-01-23T19:52:20Z&sv=2022-11-02&sr=b&sig=5nybSintfRVU3FVJSQNmgKE%2B0Gh5ZHCttBa9bUux9Qs%3D",
+    "stages": [
+      {
+        "name": "stage1",
+        "start_time": 51,
+        "end_time": 83
+      },
+      {
+        "name": "stage2",
+        "start_time": 80,
+        "end_time": 93
+      },
+      {
+        "name": "stage3",
+        "start_time": 93,
+        "end_time": 104
+      },
+      {
+        "name": "stage4",
+        "start_time": 104,
+        "end_time": 106
+      },
+      {
+        "name": "stage5",
+        "start_time": 106,
+        "end_time": 120
+      }
+    ],
+    "user_id": "userebobo",
+    "deployment_id": "deployment_test",
+    "processing_id": "111",
+    "timestamp": "2025-01-20T14:23:45.123456Z"
+  }

@@ -1,4 +1,3 @@
-# app/utils.py
 import os
 import tempfile
 import requests
@@ -8,10 +7,10 @@ logger = logging.getLogger(__name__)
 
 def get_local_path(video_url: str) -> str:
     """
-    Checks if the video_url is a local file or a URL. If it is a URL,
-    downloads it to a temporary file and returns the local path.
+    Checks if the video_url is a URL or a local file.
+    If it is a URL, downloads it to a temporary file and returns the local path.
     """
-    if video_url.startswith("http://") or video_url.startswith("https://"):
+    if video_url.startswith(("http://", "https://")):
         try:
             response = requests.get(video_url, stream=True)
             response.raise_for_status()

@@ -13,22 +13,24 @@ from app.utils import get_local_path
 logger = logging.getLogger(__name__)
 
 # Constants
-MODEL_SUBPATH = os.path.join("models", "2_shotput", "shotput_stage1.keras")
+MODEL_SUBPATH = os.path.join( "models", "2_shotput", "shotput_stage1.keras")
 MAX_SEQUENCE_LENGTH = 170
 
 @register_keras_serializable()
 def weighted_mse(y_true, y_pred):
     """Weighted Mean Squared Error to prioritize true negatives."""
-    weights = K.switch(y_true < 0.70, 2.0, 1.0)
+    weights = K.switch(y_true < 0.70, 2.0, 1.0)  # Weight true negatives higher
     return K.mean(weights * K.square(y_true - y_pred))
 
-# Initialize Mediapipe Pose
+# Initialize MediaPipe Pose
 mp_pose = mp.solutions.pose
 pose = mp_pose.Pose()
 
 def calculate_angle(a, b, c):
     """Calculate the angle between three points."""
-    a, b, c = np.array(a), np.array(b), np.array(c)
+    a = np.array(a)
+    b = np.array(b)
+    c = np.array(c)
     ba = a - b
     bc = c - b
     cosine_angle = np.dot(ba, bc) / (np.linalg.norm(ba) * np.linalg.norm(bc))
@@ -92,7 +94,7 @@ def main(video_path):
         prediction = model.predict(keypoints_padded)[0][0]
         score = classify_score(prediction)
         
-        return {
+        return { 
             "video": video_path,
             "predicted_score": float(prediction),
             "classified_score": score

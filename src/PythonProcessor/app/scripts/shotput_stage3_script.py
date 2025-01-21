@@ -1,19 +1,19 @@
-import os
-import numpy as np
 import logging
+import os
 import cv2
-import mediapipe as mp
 import json
+import numpy as np
+import mediapipe as mp
 from tensorflow.keras.models import load_model
 from app.utils import get_local_path
 
 logger = logging.getLogger(__name__)
 
 # Constants
-MODEL_SUBPATH = os.path.join("models", "2_shotput", "shotput_stage3.keras")
-MAX_SEQUENCE_LENGTH = 100  # Adjust this value as needed
+MODEL_PATH = os.path.join("app", "models", "2_shotput", "shotput_stage3.keras")
+MAX_SEQUENCE_LENGTH = 100  # Based on original working script
 
-# Initialize Mediapipe Pose with tracking confidence parameters
+# Initialize MediaPipe Pose with tracking confidence parameters
 mp_pose = mp.solutions.pose
 pose = mp_pose.Pose(static_image_mode=False, min_detection_confidence=0.5, min_tracking_confidence=0.5)
 
@@ -22,8 +22,7 @@ def calculate_angle(a, b, c):
     ba = [a[0] - b[0], a[1] - b[1]]
     bc = [c[0] - b[0], c[1] - b[1]]
     cosine_angle = np.dot(ba, bc) / (np.linalg.norm(ba) * np.linalg.norm(bc))
-    cosine_angle = np.clip(cosine_angle, -1.0, 1.0)
-    return np.degrees(np.arccos(cosine_angle))
+    return np.degrees(np.arccos(np.clip(cosine_angle, -1.0, 1.0)))
 
 def calculate_velocity(coord1, coord2, fps=30):
     """Calculate velocity between two coordinate points given fps."""
@@ -33,22 +32,22 @@ def calculate_velocity(coord1, coord2, fps=30):
     return distance * fps
 
 def extract_keypoints(video_path):
-    """
-    Extract left and right leg keypoints from the video.
-    Each frame produces a dictionary with 'left_leg' and 'right_leg' data.
-    """
+    """Extract left and right leg keypoints from the video."""
     keypoints = []
     cap = cv2.VideoCapture(video_path)
     if not cap.isOpened():
-        raise Exception("Could not open video file")
-    while True:
+        raise Exception(f"Could not open video file: {video_path}")
+    
+    while cap.isOpened():
         ret, frame = cap.read()
         if not ret:
             break
+        
         frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-        results = pose.process(frame_rgb)
-        if results.pose_landmarks:
-            landmarks = results.pose_landmarks.landmark
+        result = pose.process(frame_rgb)
+        
+        if result.pose_landmarks:
+            landmarks = result.pose_landmarks.landmark
             left_leg = {
                 "hip": [landmarks[mp_pose.PoseLandmark.LEFT_HIP].x, landmarks[mp_pose.PoseLandmark.LEFT_HIP].y],
                 "knee": [landmarks[mp_pose.PoseLandmark.LEFT_KNEE].x, landmarks[mp_pose.PoseLandmark.LEFT_KNEE].y],
@@ -66,7 +65,7 @@ def extract_keypoints(video_path):
 def extract_features(keypoints):
     """
     Extract features from keypoints.
-    For each frame (starting at frame 1) calculate:
+    For each frame (starting at frame 1), calculate:
       - The velocity of the left ankle.
       - The knee angle from the right leg.
       - The distance between left and right ankles.
@@ -89,45 +88,46 @@ def extract_features(keypoints):
     return np.array(features)
 
 def classify_score(predictions):
-    """Map the prediction vector to a score by taking the argmax and mapping to 0, 0.5, or 1."""
-    class_map = {0: 0, 1: 0.5, 2: 1}
-    predicted_class = np.argmax(predictions)
-    return class_map.get(predicted_class, 0)
+    """Map prediction to class labels (0, 0.5, 1)."""
+    score_mapping = {0: 0, 1: 0.5, 2: 1}
+    return score_mapping[np.argmax(predictions)]
 
 def main(video_path):
-    """Process video for stage3 and return prediction results."""
+    """Process video for stage 3 analysis and return results."""
     local_path = None
     try:
         local_path = get_local_path(video_path)
         keypoints = extract_keypoints(local_path)
+        
         if not keypoints:
             return {"video": video_path, "error": "No keypoints extracted"}
         
         features = extract_features(keypoints)
         if features.size == 0:
             return {"video": video_path, "error": "No features extracted"}
-        
+
+        # Reshape features to match model input
         features = features.reshape(1, features.shape[0], features.shape[1])
-        base_dir = os.path.dirname(os.path.dirname(__file__))
-        model_path = os.path.join(base_dir, MODEL_SUBPATH)
-        model = load_model(model_path)
+
+        # Load the model
+        model = load_model(MODEL_PATH)
+
+        # Predict and classify
         predictions = model.predict(features)
-        score = classify_score(predictions[0])
-        
+        classified_score = classify_score(predictions)
+
         return {
             "video": video_path,
             "predicted_scores": predictions.tolist(),
-            "classified_score": float(score)
+            "classified_score": float(classified_score)
         }
+
     except Exception as e:
         logger.error(f"Error processing video in stage3: {str(e)}")
         return {"video": video_path, "error": str(e)}
     finally:
-        if video_path.startswith(("http://", "https://")) and local_path and os.path.exists(local_path):
-            try:
-                os.unlink(local_path)
-            except Exception as cleanup_e:
-                logger.error(f"Error cleaning up temporary file in stage3: {str(cleanup_e)}")
+        if local_path and os.path.exists(local_path):
+            os.unlink(local_path)
 
 if __name__ == "__main__":
     test_video = os.path.join(os.path.dirname(os.path.dirname(__file__)), "test_videos", "stage3.mp4")

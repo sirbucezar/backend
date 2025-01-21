@@ -1,0 +1,9 @@
+{
+    "IsEncrypted": false,
+    "Values": {
+      "AzureWebJobsStorage": "DefaultEndpointsProtocol=https;AccountName=athleticstorage;AccountKey=dlzsxhNmmhxTevZb4yggD9WWc8t+19vi64XjXkLEKPclZ9xNBnl/XAJL9uWlLmOzG4FCxnTP3VIF+ASt2p0E9g==;EndpointSuffix=core.windows.net",
+      "FUNCTIONS_WORKER_RUNTIME": "dotnet-isolated",
+      "StorageAccountKey": "dlzsxhNmmhxTevZb4yggD9WWc8t+19vi64XjXkLEKPclZ9xNBnl/XAJL9uWlLmOzG4FCxnTP3VIF+ASt2p0E9g==",
+      "PythonServiceUrl": "https://localhost:5001"
+    }
+  }
