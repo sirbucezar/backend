@@ -35,22 +35,14 @@ const NewAnalysis = () => {
    const formatStudentName = (name) => {
       if (!name) return '';
       const parts = name.trim().split(/\s+/);
-      if (parts.length >= 2) {
-         return `${parts[1]}_${parts[0]}`; // Assuming "First Last" -> "Last_First"
-      }
-      return parts[0]; // Fallback in case of single name
+      return parts.length >= 2 ? `${parts[1]}_${parts[0]}` : parts[0];
    };
 
    const getSasForFile = async (filename) => {
       const functionUrl = `https://dotnet-fapp.azurewebsites.net/api/GetSasToken?code=3-172eA71LvFWcg-aWsKHJlQu_VyQ0aFe9lxR0BrQsAJAzFux1i_pA%3D%3D&filename=${encodeURIComponent(filename)}`;
-
       try {
          const response = await fetch(functionUrl, { method: 'GET' });
-
-         if (!response.ok) {
-            throw new Error(`SAS error: HTTP ${response.status}`);
-         }
-
+         if (!response.ok) throw new Error(`SAS error: HTTP ${response.status}`);
          const data = await response.json();
          setSasUrl(data.sas_url);
          return data.sas_url;
@@ -71,11 +63,7 @@ const NewAnalysis = () => {
             },
             body: file,
          });
-
-         if (!response.ok) {
-            throw new Error(`Upload failed with status: ${response.status}`);
-         }
-
+         if (!response.ok) throw new Error(`Upload failed with status: ${response.status}`);
          toast.success('Video uploaded successfully!');
          return sasUrl;
       } catch (error) {
@@ -87,71 +75,63 @@ const NewAnalysis = () => {
 
    const handleSubmit = async (e) => {
       e.preventDefault();
-      if (selectedStudent && fileName) {
-         setIsLoading(true);
-         toast.info('Getting SAS token...');
-
-         try {
-            const sasUrl = await getSasForFile(fileName);
-
-            if (sasUrl) {
-               toast.success('SAS token received! Uploading...');
-               await uploadFileToBlob(videoSrc, sasUrl);
-               setShowVideoEditor(true);
-            }
-         } catch (error) {
-            toast.error('Error during submission. Check logs.');
-         } finally {
-            setIsLoading(false);
-         }
-      } else {
+      if (!selectedStudent || !fileName) {
          toast.error('Please select a student and video before submitting.');
+         return;
+      }
+      setIsLoading(true);
+      toast.info('Getting SAS token...');
+      try {
+         const sasUrl = await getSasForFile(fileName);
+         if (sasUrl) {
+            toast.success('SAS token received! Uploading...');
+            await uploadFileToBlob(videoSrc, sasUrl);
+            setShowVideoEditor(true);
+         }
+      } catch (error) {
+         toast.error('Error during submission. Check logs.');
+      } finally {
+         setIsLoading(false);
       }
    };
 
    const handleAnalyze = async () => {
-      if (isStagesSaved && sasUrl) {
-         setIsLoading(true);
-         toast.info('Processing video...');
+      if (!isStagesSaved || !fileName || !sasUrl) {
+         toast.warning('Ensure all steps are completed before analyzing.');
+         return;
+      }
 
-         const requestData = {
+      setIsLoading(true);
+      toast.info('Submitting analysis...');
+
+      try {
+         const functionUrl = 'https://dotnet-fapp.azurewebsites.net/api/process_video';
+         const functionKey = '3-172eA71LvFWcg-aWsKHJlQu_VyQ0aFe9lxR0BrQsAJAzFux1i_pA%3D%3D';
+         const requestUrl = `${functionUrl}?code=${functionKey}`;
+
+         const postData = {
             exercise: 'shotput',
             video_url: sasUrl,
-            stages: rubric.stages.map((stage) => ({
-               name: stage.stage_name,
-               start_time: stage.start_time,
-               end_time: stage.end_time,
-            })),
+            stages: rubric.stages,
             user_id: formatStudentName(selectedStudent),
             deployment_id: 'preprod',
             processing_id: '',
             timestamp: new Date().toISOString(),
          };
 
-         try {
-            const response = await fetch('https://dotnet-fapp.azurewebsites.net/api/process_video', {
-               method: 'POST',
-               headers: {
-                  'Content-Type': 'application/json',
-               },
-               body: JSON.stringify(requestData),
-            });
+         const response = await fetch(requestUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(postData),
+         });
 
-            if (!response.ok) {
-               throw new Error(`Processing failed: ${response.status}`);
-            }
+         if (!response.ok) throw new Error(`Request failed with status ${response.status}`);
 
-            const result = await response.json();
-            toast.success('Video processed successfully!');
-            console.log('Processing result:', result);
-         } catch (error) {
-            console.error('Error processing video:', error);
-            toast.error('Error during video processing.');
-         } finally {
-            setIsLoading(false);
-         }
-      } else {
-         toast.warning('Ensure all stages are saved and the video is uploaded.');
+         toast.success('Analysis completed successfully!');
+      } catch (error) {
+         toast.error(`Error: ${error.message}`);
+      } finally {
+         setIsLoading(false);
       }
    };
 
@@ -162,36 +142,19 @@ const NewAnalysis = () => {
                <div className={s.newAnalysis__title}>Create a new analysis</div>
                {!showVideoEditor ? (
                   <form onSubmit={handleSubmit}>
-                     <ChooseStudent setIsUserChosen={setSelectedStudent} />
-                     <UploadVideo
-                        onUpload={handleVideoUpload}
-                        fileName={fileName}
-                        setFileName={setFileName}
-                     />
+                     <ChooseStudent setSelectedStudent={setSelectedStudent} />
+                     <UploadVideo onUpload={handleVideoUpload} fileName={fileName} setFileName={setFileName} />
                      <button type="submit" className={s.newAnalysis__submit} disabled={isLoading}>
                         {isLoading ? 'Uploading...' : 'Submit'}
                      </button>
                   </form>
                ) : (
-                  <button
-                     className={`${s.newAnalysis__submit} ${isLoading ? s.disabled : ''}`}
-                     onClick={handleAnalyze}
-                     disabled={isLoading}
-                  >
+                  <button className={s.newAnalysis__submit} onClick={handleAnalyze} disabled={isLoading}>
                      {isLoading ? 'Processing...' : 'Analyze'}
                   </button>
                )}
             </div>
-            {showVideoEditor ? (
-               <VideoEditor
-                  videoSrc={URL.createObjectURL(videoSrc)}
-                  setIsStagesSaved={setIsStagesSaved}
-                  rubric={rubric}
-                  setRubric={setRubric}
-               />
-            ) : (
-               <Rubrics currentRubric={currentRubric} setCurrentRubric={setCurrentRubric} />
-            )}
+            {showVideoEditor ? <VideoEditor videoSrc={videoSrc} setIsStagesSaved={setIsStagesSaved} rubric={rubric} setRubric={setRubric} /> : <Rubrics currentRubric={currentRubric} setCurrentRubric={setCurrentRubric} />}
          </div>
       </div>
    );
