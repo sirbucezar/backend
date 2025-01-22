@@ -15,6 +15,7 @@ const NewAnalysis = () => {
    const [isStagesSaved, setIsStagesSaved] = useState(false);
    const [isLoading, setIsLoading] = useState(false);
    const [sasUrl, setSasUrl] = useState(null);
+   const [currentStageIndex, setCurrentStageIndex] = useState(0);
 
    const [rubric, setRubric] = useState({
       video_id: '',
@@ -63,6 +64,7 @@ const NewAnalysis = () => {
             },
             body: file,
          });
+
          if (!response.ok) throw new Error(`Upload failed with status: ${response.status}`);
          toast.success('Video uploaded successfully!');
          return sasUrl;
@@ -142,7 +144,10 @@ const NewAnalysis = () => {
                <div className={s.newAnalysis__title}>Create a new analysis</div>
                {!showVideoEditor ? (
                   <form onSubmit={handleSubmit}>
-                     <ChooseStudent setSelectedStudent={setSelectedStudent} />
+                     <ChooseStudent setSelectedStudent={(student) => {
+                        setSelectedStudent(student);
+                        toast.success(`Student ${formatStudentName(student)} selected`);
+                     }} />
                      <UploadVideo onUpload={handleVideoUpload} fileName={fileName} setFileName={setFileName} />
                      <button type="submit" className={s.newAnalysis__submit} disabled={isLoading}>
                         {isLoading ? 'Uploading...' : 'Submit'}
@@ -154,7 +159,18 @@ const NewAnalysis = () => {
                   </button>
                )}
             </div>
-            {showVideoEditor ? <VideoEditor videoSrc={videoSrc} setIsStagesSaved={setIsStagesSaved} rubric={rubric} setRubric={setRubric} /> : <Rubrics currentRubric={currentRubric} setCurrentRubric={setCurrentRubric} />}
+            {showVideoEditor ? (
+               <VideoEditor
+                  videoSrc={videoSrc}
+                  setIsStagesSaved={setIsStagesSaved}
+                  rubric={rubric}
+                  setRubric={setRubric}
+                  currentStageIndex={currentStageIndex}
+                  setCurrentStageIndex={setCurrentStageIndex}
+               />
+            ) : (
+               <Rubrics currentRubric={currentRubric} setCurrentRubric={setCurrentRubric} />
+            )}
          </div>
       </div>
    );
