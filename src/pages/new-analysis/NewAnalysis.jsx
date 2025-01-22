@@ -17,8 +17,8 @@ const NewAnalysis = () => {
   // Student & rubrics
   const [selectedStudent, setSelectedStudent] = useState('');
 
-  // We’ll store the chosen “sport” or the entire “rubric” in here.
-  // If your <Rubrics> component sets a single field like “sport,” adapt accordingly.
+  // The “sport” or entire “rubric” object goes here.
+  // If <Rubrics> sets something like { sport: "shotput", stages: [...] }, store it here:
   const [currentRubric, setCurrentRubric] = useState(null);
 
   // Other states
@@ -91,6 +91,7 @@ const NewAnalysis = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    // Basic checks: student chosen, video selected, rubric chosen
     if (!selectedStudent) {
       toast.error('Please select a student first.');
       return;
@@ -99,7 +100,7 @@ const NewAnalysis = () => {
       toast.error('Please select a video to upload.');
       return;
     }
-    if (!currentRubric) {
+    if (!currentRubric || !currentRubric.stages) {
       toast.error('Please select a sport / rubric before submitting.');
       return;
     }
@@ -137,9 +138,12 @@ const NewAnalysis = () => {
       const functionKey = '3-172eA71LvFWcg-aWsKHJlQu_VyQ0aFe9lxR0BrQsAJAzFux1i_pA%3D%3D';
       const requestUrl = `${functionUrl}?code=${functionKey}`;
 
+      // We pull 'sport' from currentRubric if it’s there; fallback to shotput
+      const exerciseName = currentRubric?.sport || 'shotput';
+
+      // The stages come from currentRubric.stages. And the user name is formatted:
       const postData = {
-        // If your rubric includes the “sport,” or if you store it separately, adapt as needed:
-        exercise: currentRubric?.sport || 'shotput',
+        exercise: exerciseName,
         video_url: sasUrl,
         stages: currentRubric.stages,
         user_id: formatStudentName(selectedStudent),
