@@ -40,10 +40,14 @@ const NewAnalysis = () => {
    };
 
    const getSasForFile = async (filename) => {
-      const functionUrl = `https://dotnet-fapp.azurewebsites.net/api/GetSasToken?code=3-172eA71LvFWcg-aWsKHJlQu_VyQ0aFe9lxR0BrQsAJAzFux1i_pA%3D%3D&filename=${encodeURIComponent(filename)}`;
+      const functionUrl = `https://dotnet-fapp.azurewebsites.net/api/GetSasToken`;
+      const functionKey = `3-172eA71LvFWcg-aWsKHJlQu_VyQ0aFe9lxR0BrQsAJAzFux1i_pA%3D%3D`;
+   
       try {
-         const response = await fetch(functionUrl, { method: 'GET' });
+         const response = await fetch(`${functionUrl}?code=${functionKey}&filename=${encodeURIComponent(filename)}`, { method: 'GET' });
+   
          if (!response.ok) throw new Error(`SAS error: HTTP ${response.status}`);
+   
          const data = await response.json();
          setSasUrl(data.sas_url);
          return data.sas_url;
