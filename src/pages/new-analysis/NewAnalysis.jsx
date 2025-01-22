@@ -11,7 +11,7 @@ const NewAnalysis = () => {
    const [videoSrc, setVideoSrc] = useState(null);
    const [currentRubric, setCurrentRubric] = useState(null);
    const [fileName, setFileName] = useState(null);
-   const [selectedStudent, setSelectedStudent] = useState(null);
+   const [selectedStudent, setSelectedStudent] = useState('');
    const [isStagesSaved, setIsStagesSaved] = useState(false);
    const [isLoading, setIsLoading] = useState(false);
    const [sasUrl, setSasUrl] = useState(null);
@@ -144,10 +144,12 @@ const NewAnalysis = () => {
                <div className={s.newAnalysis__title}>Create a new analysis</div>
                {!showVideoEditor ? (
                   <form onSubmit={handleSubmit}>
-                     <ChooseStudent setSelectedStudent={(student) => {
-                        setSelectedStudent(student);
-                        toast.success(`Student ${formatStudentName(student)} selected`);
-                     }} />
+                        <ChooseStudent
+                        setSelectedStudent={(student) => {
+                           setSelectedStudent(student);
+                           toast.success(`Student ${formatStudentName(student)} selected`);
+                        }}
+                     />
                      <UploadVideo onUpload={handleVideoUpload} fileName={fileName} setFileName={setFileName} />
                      <button type="submit" className={s.newAnalysis__submit} disabled={isLoading}>
                         {isLoading ? 'Uploading...' : 'Submit'}
