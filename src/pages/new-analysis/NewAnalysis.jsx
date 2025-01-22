@@ -11,9 +11,10 @@ const NewAnalysis = () => {
    const [videoSrc, setVideoSrc] = useState(null);
    const [currentRubric, setCurrentRubric] = useState(null);
    const [fileName, setFileName] = useState(null);
-   const [isUserChosen, setIsUserChosen] = useState(false);
+   const [selectedStudent, setSelectedStudent] = useState(null);
    const [isStagesSaved, setIsStagesSaved] = useState(false);
    const [isLoading, setIsLoading] = useState(false);
+   const [sasUrl, setSasUrl] = useState(null);
 
    const [rubric, setRubric] = useState({
       video_id: '',
@@ -31,6 +32,15 @@ const NewAnalysis = () => {
       setFileName(file.name);
    };
 
+   const formatStudentName = (name) => {
+      if (!name) return '';
+      const parts = name.trim().split(/\s+/);
+      if (parts.length >= 2) {
+         return `${parts[1]}_${parts[0]}`; // Assuming "First Last" -> "Last_First"
+      }
+      return parts[0]; // Fallback in case of single name
+   };
+
    const getSasForFile = async (filename) => {
       const functionUrl = `https://dotnet-fapp.azurewebsites.net/api/GetSasToken?code=3-172eA71LvFWcg-aWsKHJlQu_VyQ0aFe9lxR0BrQsAJAzFux1i_pA%3D%3D&filename=${encodeURIComponent(filename)}`;
 
@@ -42,6 +52,7 @@ const NewAnalysis = () => {
          }
 
          const data = await response.json();
+         setSasUrl(data.sas_url);
          return data.sas_url;
       } catch (error) {
          console.error('Error fetching SAS URL:', error);
@@ -76,7 +87,7 @@ const NewAnalysis = () => {
 
    const handleSubmit = async (e) => {
       e.preventDefault();
-      if (currentRubric && fileName && isUserChosen) {
+      if (selectedStudent && fileName) {
          setIsLoading(true);
          toast.info('Getting SAS token...');
 
@@ -94,7 +105,53 @@ const NewAnalysis = () => {
             setIsLoading(false);
          }
       } else {
-         toast.error('Please select a student, rubric, and video before submitting.');
+         toast.error('Please select a student and video before submitting.');
+      }
+   };
+
+   const handleAnalyze = async () => {
+      if (isStagesSaved && sasUrl) {
+         setIsLoading(true);
+         toast.info('Processing video...');
+
+         const requestData = {
+            exercise: 'shotput',
+            video_url: sasUrl,
+            stages: rubric.stages.map((stage) => ({
+               name: stage.stage_name,
+               start_time: stage.start_time,
+               end_time: stage.end_time,
+            })),
+            user_id: formatStudentName(selectedStudent),
+            deployment_id: 'preprod',
+            processing_id: '',
+            timestamp: new Date().toISOString(),
+         };
+
+         try {
+            const response = await fetch('https://dotnet-fapp.azurewebsites.net/api/process_video', {
+               method: 'POST',
+               headers: {
+                  'Content-Type': 'application/json',
+               },
+               body: JSON.stringify(requestData),
+            });
+
+            if (!response.ok) {
+               throw new Error(`Processing failed: ${response.status}`);
+            }
+
+            const result = await response.json();
+            toast.success('Video processed successfully!');
+            console.log('Processing result:', result);
+         } catch (error) {
+            console.error('Error processing video:', error);
+            toast.error('Error during video processing.');
+         } finally {
+            setIsLoading(false);
+         }
+      } else {
+         toast.warning('Ensure all stages are saved and the video is uploaded.');
       }
    };
 
@@ -105,7 +162,7 @@ const NewAnalysis = () => {
                <div className={s.newAnalysis__title}>Create a new analysis</div>
                {!showVideoEditor ? (
                   <form onSubmit={handleSubmit}>
-                     <ChooseStudent setIsUserChosen={setIsUserChosen} />
+                     <ChooseStudent setIsUserChosen={setSelectedStudent} />
                      <UploadVideo
                         onUpload={handleVideoUpload}
                         fileName={fileName}
@@ -116,8 +173,12 @@ const NewAnalysis = () => {
                      </button>
                   </form>
                ) : (
-                  <button className={`${s.newAnalysis__submit} ${isLoading ? s.disabled : ''}`}>
-                     Analyzing...
+                  <button
+                     className={`${s.newAnalysis__submit} ${isLoading ? s.disabled : ''}`}
+                     onClick={handleAnalyze}
+                     disabled={isLoading}
+                  >
+                     {isLoading ? 'Processing...' : 'Analyze'}
                   </button>
                )}
             </div>
