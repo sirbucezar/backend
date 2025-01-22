@@ -12,11 +12,10 @@ const VideoEditor = ({
   currentStageIndex,
   setCurrentStageIndex
 }) => {
-  // If your rubric is ever null or missing .stages, do a quick safe-check:
   if (!rubric || !rubric.stages) {
     return (
       <div className={s.videoEditor}>
-        <p>No rubric data found. Please pick a sport or define your stages.</p>
+        <p>No rubric data found. Please pick a sport or define the stages.</p>
       </div>
     );
   }
@@ -36,7 +35,7 @@ const VideoEditor = ({
   const [isScrubbing, setIsScrubbing] = useState(false);
 
   const [frameRate, setFrameRate] = useState(30);
-  const [videoLength, setVideoLength] = useState(null);
+  const [videoLength, setVideoLength] = useState(0);
 
   const [lastChange, setLastChange] = useState(null);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -75,13 +74,11 @@ const VideoEditor = ({
     }
   };
 
-  // If user clicks stage # in a sidebar or something:
   const handleStageChange = (index) => {
     setLastChange(null);
     loadStageTimes(index, rubric);
     setCurrentStage(index);
     setCurrentStageIndex(index);
-
     if (videoRef.current) {
       videoRef.current.pause();
     }
@@ -93,9 +90,9 @@ const VideoEditor = ({
       setStartFrame(selectedStage.start_time);
       setEndFrame(selectedStage.end_time);
     } else {
-      // if times aren't set, start at 0 -> entire video
+      // if not set, default to the entire video
       setStartFrame(0);
-      setEndFrame(videoLength || 0);
+      setEndFrame(videoLength);
     }
   };
 
@@ -107,7 +104,6 @@ const VideoEditor = ({
     // eslint-disable-next-line
   }, []);
 
-  // Once the <video> has metadata, set the duration
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
@@ -121,7 +117,6 @@ const VideoEditor = ({
     };
   }, []);
 
-  // Keep track of normal progress while playing (for the “progress” line)
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
@@ -138,7 +133,6 @@ const VideoEditor = ({
     };
   }, [isScrubbing, isDraggingStart, isDraggingEnd]);
 
-  // Handle scrubbing on the timeline
   const handleScrub = (e) => {
     const track = trackRef.current;
     const video = videoRef.current;
@@ -156,7 +150,7 @@ const VideoEditor = ({
     }
   };
 
-  // Once loaded, measure video length in frames
+  // Measure video length in frames once loaded
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
@@ -247,10 +241,8 @@ const VideoEditor = ({
       document.removeEventListener('touchmove', scrubbing);
       document.removeEventListener('touchend', stopScrubbing);
     };
-    // eslint-disable-next-line
   }, [isScrubbing]);
 
-  // Dragging start/end range
   useEffect(() => {
     if (isDraggingStart || isDraggingEnd) {
       document.addEventListener('mousemove', handleDragging);
@@ -270,11 +262,13 @@ const VideoEditor = ({
     setIsScrubbing(true);
     handleScrub(e);
   };
+
   const scrubbing = (e) => {
     if (isScrubbing) {
       handleScrub(e);
     }
   };
+
   const stopScrubbing = () => {
     setIsScrubbing(false);
   };
@@ -322,10 +316,10 @@ const VideoEditor = ({
     }
   };
 
-  // Positioning in % on timeline
   const calculatePositionPercentage = (frame) => {
     const totalFrames = Math.floor(duration * frameRate);
-    return totalFrames ? (frame / totalFrames) * 100 : 0;
+    if (!totalFrames) return 0;
+    return (frame / totalFrames) * 100;
   };
 
   const togglePlayPause = () => {
@@ -346,6 +340,7 @@ const VideoEditor = ({
 
   return (
     <div className={s.videoEditor}>
+      {/* Where you show the 5 stage buttons or so: */}
       <VideoStages
         rubric={rubric}
         setRubric={setRubric}
@@ -357,48 +352,41 @@ const VideoEditor = ({
 
       <div className={s.videoEditor__body}>
         <VideoInfo />
-        {/* 100% local preview src, no Azure needed */}
+
+        {/* 100% local playback */}
         <video
           ref={videoRef}
           src={videoSrc}
           className={s.videoEditor__video}
           controls={false}
         />
+
         <div className={s.videoEditor__controls} onClick={togglePlayPause}>
           <button
             className={`${s.videoEditor__playPause} ${isPlayingChanged ? s.active : ''}`}
           >
             {isPlaying ? (
-              // Play icon
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                <path
-                  fill="#f1f1f1"
-                  d="M6 3L20 12L6 21V3Z"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-            ) : (
-              // Pause icon
+              // (Pause icon)
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
                 <path
                   fill="#f1f1f1"
                   d="M17 4H15C14.4477 4 14 4.44772 14 5V19C14 
-                    19.5523 14.4477 20 15 20H17C17.5523 20 18 19.5523 18 
-                    19V5C18 4.44772 17.5523 4 17 4Z"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
+                    19.5523 14.4477 20 15 20H17C17.5523 20 18 19.5523 
+                    18 19V5C18 4.44772 17.5523 4 17 4Z"
                 />
                 <path
                   fill="#f1f1f1"
                   d="M9 4H7C6.44772 4 6 4.44772 6 
                     5V19C6 19.5523 6.44772 20 7 20H9C9.55228 20 10 
                     19.5523 10 19V5C10 4.44772 9.55228 4 9 4Z"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
+                />
+              </svg>
+            ) : (
+              // (Play icon)
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                <path
+                  fill="#f1f1f1"
+                  d="M6 3L20 12L6 21V3Z"
                 />
               </svg>
             )}
@@ -409,7 +397,7 @@ const VideoEditor = ({
       <VideoTicks duration={duration} startScrubbing={startScrubbing} />
 
       <div ref={trackRef} className={s.videoEditor__track}>
-        {/* Highlighted range for start->end */}
+        {/* Range Highlight */}
         <div
           className={s.videoEditor__rangeHighlight}
           style={{
@@ -419,15 +407,14 @@ const VideoEditor = ({
         ></div>
 
         <div>
-          {/* Start handle */}
+          {/* Start Handle */}
           <div
             className={s.videoEditor__rangeHandle}
             style={{ left: `${calculatePositionPercentage(startFrame)}%` }}
             onMouseDown={(e) => handleDragStart(e, 'start')}
             onTouchStart={(e) => handleDragStart(e, 'start')}
           ></div>
-
-          {/* End handle */}
+          {/* End Handle */}
           <div
             className={s.videoEditor__rangeHandle}
             style={{ left: `${calculatePositionPercentage(endFrame)}%` }}
@@ -436,7 +423,7 @@ const VideoEditor = ({
           ></div>
         </div>
 
-        {/* Actual progress line for the playhead */}
+        {/* Progress Indicator (playhead) */}
         <div
           className={s.videoEditor__progress}
           style={{ left: `${progress}%` }}
