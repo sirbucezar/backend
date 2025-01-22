@@ -9,20 +9,19 @@ import { toast } from 'sonner';
 const NewAnalysis = () => {
   const [showVideoEditor, setShowVideoEditor] = useState(false);
 
-  // For Student & Sport
-  // Instead of a boolean, store the actual student name:
+  // Student, Sport, and local video states
   const [selectedStudent, setSelectedStudent] = useState('');
-  const [currentRubric, setCurrentRubric] = useState(null);
-
-  // Local Video
+  const [currentRubric, setCurrentRubric] = useState(null); // e.g. { name: "shotput" } or something
   const [videoSrc, setVideoSrc] = useState('');
   const [fileName, setFileName] = useState(null);
+  const [rawFile, setRawFile] = useState(null);
 
-  // Extra states
+  // SAS + “Analyze” workflow
+  const [sasUrl, setSasUrl] = useState(null);
   const [isStagesSaved, setIsStagesSaved] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  // This is your “rubric” data with 5 stages
+  // Local “rubric” with 5 stages that store frames, not timestamps
   const [rubric, setRubric] = useState({
     video_id: '',
     stages: [
@@ -34,64 +33,89 @@ const NewAnalysis = () => {
     ],
   });
 
-  // 1) STOP user if something not chosen & then do the SAS -> PUT -> POST
+  // 1) Store video for local preview, but do NOT upload yet
+  const handleVideoUpload = (file) => {
+    const fileURL = URL.createObjectURL(file);
+    setVideoSrc(fileURL);
+    setFileName(file.name);
+    setRawFile(file);
+  };
+
+  // 2) “Submit” → only does SAS + upload → not calling process_video yet
   const handleSubmit = async () => {
-    // Check required fields
-    if (!currentRubric) {
-      toast.error('Please select a sport before submitting.');
-      return;
-    }
-    if (!fileName) {
-      toast.error('Please select a video before submitting.');
-      return;
-    }
+    // Ensure user picked everything
     if (!selectedStudent) {
-      toast.error('Please select a student before submitting.');
+      toast.error('Please choose a student first.');
+      return;
+    }
+    if (!currentRubric) {
+      toast.error('Please pick a sport/rubric first.');
+      return;
+    }
+    if (!rawFile || !fileName) {
+      toast.error('Please upload a video first.');
       return;
     }
 
+    // Actually do the upload
     try {
       setIsLoading(true);
-      toast.info('Fetching SAS token...');
+      toast.info('Getting SAS token...');
 
-      // 1) GET SAS
       const sas = await getSasForFile(fileName);
-      toast.success('SAS token received! Uploading to blob...');
+      toast.success('SAS received. Uploading video...');
 
-      // 2) PUT to blob
-      // We need the actual File object to do that, so ensure you store it as well:
-      // but from your code, you're only storing the fileName, not the raw file.
-      // We'll assume you are storing the raw file somewhere, or you'll adjust the code below.
-      // (If you need to store the "rawFile" in state, do so in handleVideoUpload)
-      if (!rawFile) {
-        toast.error('The raw video File is missing in state. Please store it in handleVideoUpload.');
-        return;
-      }
       await uploadFileToBlob(rawFile, sas);
-      toast.success('Video uploaded successfully!');
+      toast.success('Upload complete!');
 
-      // 3) POST to process_video
-      toast.info('Sending process_video request...');
-      await processVideo(sas);
-      toast.success('process_video completed successfully!');
+      // Save the SAS so we can do the final “process_video” later
+      setSasUrl(sas);
 
-      // 4) Now show the video editor
+      // Show the editor now that the video is in Azure
       setShowVideoEditor(true);
+
     } catch (err) {
-      toast.error(`Upload or process error: ${err.message}`);
-      console.error('Video upload/process failed:', err);
+      toast.error(`Error uploading video: ${err.message}`);
+      console.error('Upload error:', err);
     } finally {
       setIsLoading(false);
     }
   };
 
-  // "GetSasToken" function
+  // 3) “Analyze” → only after user sets all stage frames, we do process_video
+  const handleAnalyze = async () => {
+    // must have all 5 stages saved
+    if (!isStagesSaved) {
+      toast.error('Please save all 5 stages before analyzing.');
+      return;
+    }
+    if (!sasUrl) {
+      toast.error('No SAS URL found. Did you upload the video first?');
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+      toast.info('Sending process_video request...');
+
+      await processVideo(sasUrl);
+      toast.success('Video processed successfully!');
+
+    } catch (err) {
+      toast.error(`Error analyzing video: ${err.message}`);
+      console.error('Analyze error:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // 4) GET SAS
   const getSasForFile = async (filename) => {
     const functionUrl = `https://dotnet-fapp.azurewebsites.net/api/GetSasToken`;
     const functionKey = `3-172eA71LvFWcg-aWsKHJlQu_VyQ0aFe9lxR0BrQsAJAzFux1i_pA%3D%3D`;
     const reqUrl = `${functionUrl}?code=${functionKey}&filename=${encodeURIComponent(filename)}`;
 
-    const resp = await fetch(reqUrl, { method: 'GET' });
+    const resp = await fetch(reqUrl);
     if (!resp.ok) {
       throw new Error(`SAS error: HTTP ${resp.status}`);
     }
@@ -99,7 +123,7 @@ const NewAnalysis = () => {
     return data.sas_url;
   };
 
-  // Actually do the PUT
+  // 5) PUT file to Blob
   const uploadFileToBlob = async (file, sasUrl) => {
     const resp = await fetch(sasUrl, {
       method: 'PUT',
@@ -110,28 +134,28 @@ const NewAnalysis = () => {
       body: file,
     });
     if (!resp.ok) {
-      throw new Error(`Upload failed: HTTP ${resp.status}`);
+      throw new Error(`Blob upload failed: HTTP ${resp.status}`);
     }
   };
 
-  // "process_video" function => POST with your exact JSON format
+  // 6) POST process_video with frames
   const processVideo = async (uploadedSasUrl) => {
-    // We also rename “stage_name” => “name” for each stage:
+    // Convert your stage_name => name, keep frames in start_time/end_time
     const mappedStages = rubric.stages.map((st) => ({
       name: st.stage_name,
       start_time: st.start_time ?? 0,
       end_time: st.end_time ?? 0,
     }));
 
-    // If your chosen sport is stored in currentRubric?.name, otherwise default "shotput"
+    // If your chosen sport is stored in e.g. currentRubric.name, fallback to “shotput”
     const exercise = currentRubric?.name || 'shotput';
 
-    // We get the actual name from selectedStudent
+    // Format the user name: “Doe_John”
     const userName = formatStudentName(selectedStudent);
 
     const payload = {
       exercise,
-      video_url: uploadedSasUrl,   // the blob SAS
+      video_url: uploadedSasUrl,
       stages: mappedStages,
       user_id: userName,
       deployment_id: 'preprod',
@@ -154,28 +178,12 @@ const NewAnalysis = () => {
     return await resp.json();
   };
 
-  // Just a quick helper to transform "Jane Doe" => "Doe_Jane"
+  // Format: “John Doe” => “Doe_John”
   const formatStudentName = (fullName) => {
-    if (!fullName || typeof fullName !== 'string') {
-      return 'Default_User';
-    }
+    if (!fullName || typeof fullName !== 'string') return 'Default_User';
     const parts = fullName.trim().split(/\s+/);
-    if (parts.length < 2) {
-      return parts[0]; // if single name
-    }
-    return parts[1] + '_' + parts[0];
-  };
-
-  // ***IMPORTANT***: We also need to store the raw file in state so we can do the upload on submit
-  const [rawFile, setRawFile] = useState(null);
-
-  // Let user pick file. We just set the local preview; we do NOT do SAS yet.
-  const handleVideoUpload = (file) => {
-    const fileURL = URL.createObjectURL(file);
-    setVideoSrc(fileURL);
-    setFileName(file.name);
-    // store the raw file so we can upload it later
-    setRawFile(file);
+    if (parts.length < 2) return parts[0];
+    return `${parts[1]}_${parts[0]}`;
   };
 
   return (
@@ -184,38 +192,45 @@ const NewAnalysis = () => {
         <div className={s.newAnalysis__left}>
           <div className={s.newAnalysis__title}>Create a new analysis</div>
 
-          {/* If we haven't shown the editor yet, show the form for Student + Video + Submit */}
+          {/* If we haven't shown the editor yet, show the form */}
           {!showVideoEditor ? (
             <>
-              {/* The student picker now sets the actual name, e.g. "John Doe" */}
+              {/* 1) Let user pick a student => store in selectedStudent */}
               <ChooseStudent setSelectedStudent={setSelectedStudent} />
 
-              {/* We only do local preview for now */}
+              {/* 2) Let user pick a video => store rawFile + preview */}
               <UploadVideo
                 onUpload={handleVideoUpload}
                 fileName={fileName}
                 setFileName={setFileName}
               />
 
-              {/* We do the SAS + PUT + process_video on submit */}
+              {/* 3) Let them pick a sport in <Rubrics>, stored in currentRubric */}
+              {/* We'll show rubrics on the right side, or here if you prefer */}
+              {/* We'll do it in the "else" below, but if you want it here, move the code around */}
+
+              {/* 4) "Submit" does upload -> show Editor */}
               <button
                 className={s.newAnalysis__submit}
                 onClick={handleSubmit}
                 disabled={isLoading}
               >
-                Submit
+                {isLoading ? 'Uploading...' : 'Submit'}
               </button>
             </>
           ) : (
+            // If we are showing the editor, user can “Analyze” once stages are saved
             <button
-              className={`${s.newAnalysis__submit} ${isLoading ? s.disabled : ''}`}
-              onClick={() => toast('You are already in the editor!')}
+              className={s.newAnalysis__submit}
+              onClick={handleAnalyze}
+              disabled={isLoading}
             >
-              {isLoading ? 'Loading...' : 'Analyze'}
+              {isLoading ? 'Processing...' : 'Analyze'}
             </button>
           )}
         </div>
 
+        {/* If the editor is shown => local playback + stage frames. Else => show Rubrics. */}
         {showVideoEditor ? (
           <VideoEditor
             videoSrc={videoSrc}
@@ -224,7 +239,10 @@ const NewAnalysis = () => {
             setRubric={setRubric}
           />
         ) : (
-          <Rubrics currentRubric={currentRubric} setCurrentRubric={setCurrentRubric} />
+          <Rubrics
+            currentRubric={currentRubric}
+            setCurrentRubric={setCurrentRubric}
+          />
         )}
       </div>
     </div>
