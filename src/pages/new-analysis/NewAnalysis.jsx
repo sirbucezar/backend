@@ -70,8 +70,8 @@ const NewAnalysis = () => {
 
    const handleSubmit = async (e) => {
       e.preventDefault();
-      if (!selectedStudent || !fileName) {
-         toast.error('Please select a student and video before submitting.');
+      if (!selectedStudent || !fileName || !currentRubric) {
+         toast.error('Please select a student, sport, and video before submitting.');
          return;
       }
       setIsLoading(true);
@@ -80,7 +80,8 @@ const NewAnalysis = () => {
          const sasUrl = await getSasForFile(fileName);
          if (sasUrl) {
             toast.success('SAS token received! Uploading...');
-            await uploadFileToBlob(videoSrc, sasUrl);
+            await uploadFileToBlob(fileName, sasUrl);
+            setVideoSrc(videoSrc); // Set the video source to the uploaded blob URL
             setShowVideoEditor(true);
          }
       } catch (error) {
