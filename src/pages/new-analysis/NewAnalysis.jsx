@@ -34,10 +34,9 @@ const NewAnalysis = () => {
     ],
   });
 
-  // 1) STOP user if something not chosen
-  const handleSubmit = () => {
-    // If the user hasn't chosen a sport (currentRubric),
-    // hasn't uploaded a video (fileName), or hasn't chosen a student (selectedStudent), error out:
+  // 1) STOP user if something not chosen & then do the SAS -> PUT -> POST
+  const handleSubmit = async () => {
+    // Check required fields
     if (!currentRubric) {
       toast.error('Please select a sport before submitting.');
       return;
@@ -51,27 +50,24 @@ const NewAnalysis = () => {
       return;
     }
 
-    // All good—show the editor
-    setShowVideoEditor(true);
-  };
-
-  // 2) As soon as the user picks a file, we GET the SAS -> PUT the file -> POST to process_video
-  const handleVideoUpload = async (file) => {
-    // Convert to local preview
-    const fileURL = URL.createObjectURL(file);
-    setVideoSrc(fileURL);
-    setFileName(file.name);
-
     try {
       setIsLoading(true);
       toast.info('Fetching SAS token...');
 
       // 1) GET SAS
-      const sas = await getSasForFile(file.name);
+      const sas = await getSasForFile(fileName);
       toast.success('SAS token received! Uploading to blob...');
 
       // 2) PUT to blob
-      await uploadFileToBlob(file, sas);
+      // We need the actual File object to do that, so ensure you store it as well:
+      // but from your code, you're only storing the fileName, not the raw file.
+      // We'll assume you are storing the raw file somewhere, or you'll adjust the code below.
+      // (If you need to store the "rawFile" in state, do so in handleVideoUpload)
+      if (!rawFile) {
+        toast.error('The raw video File is missing in state. Please store it in handleVideoUpload.');
+        return;
+      }
+      await uploadFileToBlob(rawFile, sas);
       toast.success('Video uploaded successfully!');
 
       // 3) POST to process_video
@@ -79,9 +75,8 @@ const NewAnalysis = () => {
       await processVideo(sas);
       toast.success('process_video completed successfully!');
 
-      // 4) Now show the video editor stage
+      // 4) Now show the video editor
       setShowVideoEditor(true);
-
     } catch (err) {
       toast.error(`Upload or process error: ${err.message}`);
       console.error('Video upload/process failed:', err);
@@ -171,6 +166,18 @@ const NewAnalysis = () => {
     return parts[1] + '_' + parts[0];
   };
 
+  // ***IMPORTANT***: We also need to store the raw file in state so we can do the upload on submit
+  const [rawFile, setRawFile] = useState(null);
+
+  // Let user pick file. We just set the local preview; we do NOT do SAS yet.
+  const handleVideoUpload = (file) => {
+    const fileURL = URL.createObjectURL(file);
+    setVideoSrc(fileURL);
+    setFileName(file.name);
+    // store the raw file so we can upload it later
+    setRawFile(file);
+  };
+
   return (
     <div className={s.newAnalysis}>
       <div className={s.newAnalysis__main}>
@@ -183,14 +190,14 @@ const NewAnalysis = () => {
               {/* The student picker now sets the actual name, e.g. "John Doe" */}
               <ChooseStudent setSelectedStudent={setSelectedStudent} />
 
-              {/* Immediately triggers the SAS + upload + process once a file is picked */}
+              {/* We only do local preview for now */}
               <UploadVideo
                 onUpload={handleVideoUpload}
                 fileName={fileName}
                 setFileName={setFileName}
               />
 
-              {/* "Submit" just ensures user can’t proceed if something is missing */}
+              {/* We do the SAS + PUT + process_video on submit */}
               <button
                 className={s.newAnalysis__submit}
                 onClick={handleSubmit}
