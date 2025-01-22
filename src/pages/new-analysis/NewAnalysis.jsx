@@ -8,7 +8,7 @@ import { toast } from 'sonner';
 
 const NewAnalysis = () => {
    const [showVideoEditor, setShowVideoEditor] = useState(false);
-   const [videoSrc, setVideoSrc] = useState('');
+   const [videoSrc, setVideoSrc] = useState(null);
    const [currentRubric, setCurrentRubric] = useState(null);
    const [fileName, setFileName] = useState(null);
    const [isUserChosen, setIsUserChosen] = useState(false);
@@ -16,109 +16,76 @@ const NewAnalysis = () => {
    const [isLoading, setIsLoading] = useState(false);
 
    const [rubric, setRubric] = useState({
-      // id: 2,
-      // name: 'Shot Put',
       video_id: '',
       stages: [
-         {
-            stage_name: 'stage1',
-            start_time: null,
-            end_time: null,
-         },
-         {
-            stage_name: 'stage2',
-            start_time: null,
-            end_time: null,
-         },
-         {
-            stage_name: 'stage3',
-            start_time: null,
-            end_time: null,
-         },
-         {
-            stage_name: 'stage4',
-            start_time: null,
-            end_time: null,
-         },
-         {
-            stage_name: 'stage5',
-            start_time: null,
-            end_time: null,
-         },
+         { stage_name: 'stage1', start_time: null, end_time: null },
+         { stage_name: 'stage2', start_time: null, end_time: null },
+         { stage_name: 'stage3', start_time: null, end_time: null },
+         { stage_name: 'stage4', start_time: null, end_time: null },
+         { stage_name: 'stage5', start_time: null, end_time: null },
       ],
    });
 
    const handleVideoUpload = (file) => {
-      const fileURL = URL.createObjectURL(file);
-      setVideoSrc(fileURL);
+      setVideoSrc(file);
+      setFileName(file.name);
    };
 
-   const handleSubmit = () => {
-      // toast.success('My success toast', {
-      //    style: {
-      //       background: '#f1f1f1',
-      //    },
-      // });
-
-      // const promise = () =>
-      //    new Promise((resolve) => setTimeout(() => resolve({ name: 'Sonner' }), 2000));
-
-      // toast.promise(promise, {
-      //    loading: 'Loading...',
-      //    success: (data) => {
-      //       return `${data.name} toast has been added`;
-      //    },
-      //    error: 'Error',
-      //    style: {
-      //       background: '#f1f1f1',
-      //    },
-      // });
+   const handleSubmit = async (e) => {
+      e.preventDefault();
       if (currentRubric && fileName && isUserChosen) {
-         console.log(fileName);
-
          setShowVideoEditor(true);
       }
    };
 
    const handleAnalyze = async () => {
-      if (isStagesSaved) {
-         const newRubric = { ...rubric, video_id: fileName };
-         setRubric(newRubric);
+      if (isStagesSaved && fileName && videoSrc) {
          setIsLoading(true);
+         try {
+            const functionUrl = 'https://dotnet-fapp.azurewebsites.net/api/GetSasToken';
+            const functionKey = '3-172eA71LvFWcg-aWsKHJlQu_VyQ0aFe9lxR0BrQsAJAzFux1i_pA%3D%3D';
+            const requestUrl = `${functionUrl}?code=${functionKey}&filename=${encodeURIComponent(fileName)}`;
 
-         // axios logic
-         async function getSasForFile(filename) {
-            const baseUrl = 'https://evaluation-scripts.azurewebsites.net/api/get_sas';
-            const url = `${baseUrl}?filename=${encodeURIComponent(filename)}`;
+            const response = await fetch(requestUrl, { method: 'GET' });
 
-            const response = await fetch(url, { method: 'GET' });
             if (!response.ok) {
-               throw new Error(`SAS error: HTTP ${response.status}`);
+               throw new Error(`Error fetching SAS token: ${response.status}`);
             }
+
             const data = await response.json();
-            return data.sas_url; // e.g. "https://account.blob.core.windows.net/container/filename.mp4?someSAS"
+            const sasUrl = data.sas_url;
 
-            async function uploadFile(file) {
-               const sasUrl = await getSasForFile(file.name);
+            console.log('SAS URL retrieved:', sasUrl);
 
-               // PUT the file
-               const res = await fetch(sasUrl, {
-                  method: 'PUT',
-                  headers: {
-                     'x-ms-blob-type': 'BlockBlob',
-                     'Content-Type': file.type,
-                  },
-                  body: file,
-               });
-               if (!res.ok) {
-                  throw new Error(`Upload failed: ${res.status}`);
-               }
-               console.log('Upload success to', sasUrl);
-               return sasUrl; // store for future reference
-            }
+            await uploadFile(videoSrc, sasUrl);
+            toast.success('Video uploaded successfully!');
+         } catch (error) {
+            console.error('Upload failed:', error);
+            toast.error('Failed to upload video.');
+         } finally {
+            setIsLoading(false);
+         }
+      }
+   };
+
+   const uploadFile = async (file, sasUrl) => {
+      try {
+         const response = await fetch(sasUrl, {
+            method: 'PUT',
+            headers: {
+               'x-ms-blob-type': 'BlockBlob',
+               'Content-Type': file.type,
+            },
+            body: file,
+         });
+
+         if (!response.ok) {
+            throw new Error(`Upload failed with status: ${response.status}`);
          }
 
-         await getSasForFile(videoSrc);
+         console.log('File uploaded successfully to:', sasUrl);
+      } catch (error) {
+         console.error('Error uploading file:', error);
       }
    };
 
@@ -128,28 +95,30 @@ const NewAnalysis = () => {
             <div className={s.newAnalysis__left}>
                <div className={s.newAnalysis__title}>Create a new analysis</div>
                {!showVideoEditor ? (
-                  <>
+                  <form onSubmit={handleSubmit}>
                      <ChooseStudent setIsUserChosen={setIsUserChosen} />
                      <UploadVideo
                         onUpload={handleVideoUpload}
                         fileName={fileName}
                         setFileName={setFileName}
                      />
-                     <button className={s.newAnalysis__submit} onClick={handleSubmit}>
+                     <button type="submit" className={s.newAnalysis__submit}>
                         Submit
                      </button>
-                  </>
+                  </form>
                ) : (
                   <button
                      className={`${s.newAnalysis__submit} ${isLoading ? s.disabled : ''}`}
-                     onClick={handleAnalyze}>
-                     {!isLoading ? 'Analyze' : 'Loading...'}
+                     onClick={handleAnalyze}
+                     disabled={isLoading}
+                  >
+                     {!isLoading ? 'Analyze' : 'Uploading...'}
                   </button>
                )}
             </div>
             {showVideoEditor ? (
                <VideoEditor
-                  videoSrc={videoSrc}
+                  videoSrc={URL.createObjectURL(videoSrc)}
                   setIsStagesSaved={setIsStagesSaved}
                   rubric={rubric}
                   setRubric={setRubric}
