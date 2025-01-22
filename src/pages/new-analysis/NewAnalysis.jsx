@@ -17,19 +17,8 @@ const NewAnalysis = () => {
    const [sasUrl, setSasUrl] = useState(null);
    const [currentStageIndex, setCurrentStageIndex] = useState(0);
 
-   const [rubric, setRubric] = useState({
-      video_id: '',
-      stages: [
-         { stage_name: 'stage1', start_time: null, end_time: null },
-         { stage_name: 'stage2', start_time: null, end_time: null },
-         { stage_name: 'stage3', start_time: null, end_time: null },
-         { stage_name: 'stage4', start_time: null, end_time: null },
-         { stage_name: 'stage5', start_time: null, end_time: null },
-      ],
-   });
-
    const handleVideoUpload = (file) => {
-      setVideoSrc(file);
+      setVideoSrc(URL.createObjectURL(file));
       setFileName(file.name);
    };
 
@@ -42,12 +31,12 @@ const NewAnalysis = () => {
    const getSasForFile = async (filename) => {
       const functionUrl = `https://dotnet-fapp.azurewebsites.net/api/GetSasToken`;
       const functionKey = `3-172eA71LvFWcg-aWsKHJlQu_VyQ0aFe9lxR0BrQsAJAzFux1i_pA%3D%3D`;
-   
+
       try {
          const response = await fetch(`${functionUrl}?code=${functionKey}&filename=${encodeURIComponent(filename)}`, { method: 'GET' });
-   
+
          if (!response.ok) throw new Error(`SAS error: HTTP ${response.status}`);
-   
+
          const data = await response.json();
          setSasUrl(data.sas_url);
          return data.sas_url;
@@ -169,8 +158,8 @@ const NewAnalysis = () => {
                <VideoEditor
                   videoSrc={videoSrc}
                   setIsStagesSaved={setIsStagesSaved}
-                  rubric={rubric}
-                  setRubric={setRubric}
+                  rubric={currentRubric}
+                  setRubric={setCurrentRubric}
                   currentStageIndex={currentStageIndex}
                   setCurrentStageIndex={setCurrentStageIndex}
                />

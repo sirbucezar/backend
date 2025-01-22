@@ -3,16 +3,16 @@ import s from './styles.module.scss';
 
 const UploadVideo = ({ onUpload, fileName, setFileName }) => {
    const handleUpload = (event) => {
-      const file = event.target.files[0]; // Get the first uploaded file
+      const file = event.target.files[0];
       if (file) {
-         const newFileName = file.name; // Access the file name
-         // console.log('Uploaded File Name:', fileName); // Log the file name
-         if (onUpload) {
-            onUpload(file); // Pass the file to the parent component if `onUpload` is defined
-            setFileName(newFileName);
-         }
+          console.log('Uploaded File:', file);
+          const newFileName = file.name;
+          if (onUpload) {
+              onUpload(file);
+              setFileName(newFileName);
+          }
       }
-   };
+  };
 
    return (
       <div className={s.uploadVideo}>
