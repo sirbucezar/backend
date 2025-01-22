@@ -1,14 +1,14 @@
 import React, { useEffect, useRef, useState } from 'react';
 import s from './styles.module.scss';
 
-const ChooseStudent = ({ setIsUserChosen }) => {
+const ChooseStudent = ({ setSelectedStudent }) => {
    const [students, setStudents] = useState([
       { id: 1, firstName: 'Mykyta', lastName: 'Tsykunov', isSelected: false },
       { id: 2, firstName: 'Cezar', lastName: 'Sîrbu', isSelected: false },
       { id: 3, firstName: 'Danylo', lastName: 'Bordunov', isSelected: false },
-      { id: 4, firstName: 'Danylo', lastName: 'Bordunov', isSelected: false },
-      { id: 5, firstName: 'Danylo', lastName: 'Bordunov', isSelected: false },
-      { id: 6, firstName: 'Danylo', lastName: 'Bordunov', isSelected: false },
+      { id: 4, firstName: 'Alex', lastName: 'Johnson', isSelected: false },
+      { id: 5, firstName: 'Maria', lastName: 'Smith', isSelected: false },
+      { id: 6, firstName: 'Elena', lastName: 'Brown', isSelected: false },
    ]);
    const [searchTerm, setSearchTerm] = useState('');
    const [title, setTitle] = useState('Choose a student');
@@ -16,10 +16,10 @@ const ChooseStudent = ({ setIsUserChosen }) => {
    const [isNewStudentDropdownOpen, setNewStudentIsDropdownOpen] = useState(false);
    const [firstName, setFirstName] = useState('');
    const [lastName, setLastName] = useState('');
-   const selectRef = useRef(null); // Reference to the dropdown container
+   const selectRef = useRef(null);
 
    const filteredStudents = students.filter((student) =>
-      `${student.firstName} ${student.lastName}`.toLowerCase().includes(searchTerm.toLowerCase()),
+      `${student.firstName} ${student.lastName}`.toLowerCase().includes(searchTerm.toLowerCase())
    );
 
    const handleAddStudent = (e) => {
@@ -27,7 +27,7 @@ const ChooseStudent = ({ setIsUserChosen }) => {
       if (firstName.trim() !== '' && lastName.trim() !== '') {
          setStudents([
             ...students,
-            { id: Date.now(), firstName: firstName.trim(), lastName: lastName.trim() },
+            { id: Date.now(), firstName: firstName.trim(), lastName: lastName.trim(), isSelected: false },
          ]);
          setSearchTerm('');
          setNewStudentIsDropdownOpen(false);
@@ -42,21 +42,22 @@ const ChooseStudent = ({ setIsUserChosen }) => {
    };
 
    const handleClickOutside = (event) => {
-      // Check if the click is outside the dropdown and not on a child element
       if (selectRef.current && !selectRef.current.contains(event.target)) {
          setIsDropdownOpen(false);
          setNewStudentIsDropdownOpen(false);
       }
    };
 
-   const handleSelectStudent = ({ firstName, lastName, id }) => {
-      setTitle(`${firstName} ${lastName}`);
-      const newStudents = students.map((el) => ({
+   const handleSelectStudent = (student) => {
+      setTitle(`${student.firstName} ${student.lastName}`);
+      const updatedStudents = students.map((el) => ({
          ...el,
-         isSelected: el.id === id,
+         isSelected: el.id === student.id,
       }));
-      setStudents(newStudents);
-      setIsUserChosen(true);
+      setStudents(updatedStudents);
+
+      const formattedName = `${student.lastName}_${student.firstName}`;
+      setSelectedStudent(formattedName);
       setIsDropdownOpen(false);
    };
 
@@ -96,8 +97,7 @@ const ChooseStudent = ({ setIsUserChosen }) => {
                            />
                         </svg>
                      </div>
-                     <div
-                        className={`${s.chooseStudent__search} ${isDropdownOpen ? s.active : ''}`}>
+                     <div className={`${s.chooseStudent__search} ${isDropdownOpen ? s.active : ''}`}>
                         <input
                            type="text"
                            placeholder="Search for a student..."
@@ -116,9 +116,7 @@ const ChooseStudent = ({ setIsUserChosen }) => {
                            filteredStudents.map((student) => (
                               <div
                                  key={student.id}
-                                 className={`${s.chooseStudent__item} ${
-                                    student.isSelected ? s.active : ''
-                                 }`}
+                                 className={`${s.chooseStudent__item} ${student.isSelected ? s.active : ''}`}
                                  onClick={() => handleSelectStudent(student)}>
                                  {student.firstName} {student.lastName}
                               </div>
@@ -131,10 +129,7 @@ const ChooseStudent = ({ setIsUserChosen }) => {
                         <span></span>Add a new student
                      </button>
                   </div>
-                  <form
-                     className={`${s.chooseStudent__new} ${
-                        isNewStudentDropdownOpen ? s.active : ''
-                     }`}>
+                  <form className={`${s.chooseStudent__new} ${isNewStudentDropdownOpen ? s.active : ''}`}>
                      <div className={s.chooseStudent__labelNew}>Add a new student</div>
                      <div className={s.chooseStudent__inputs}>
                         <div className={s.chooseStudent__inputNewWrapper}>
@@ -149,7 +144,7 @@ const ChooseStudent = ({ setIsUserChosen }) => {
                         <div className={s.chooseStudent__inputNewWrapper}>
                            <input
                               type="text"
-                              placeholder="Second Name"
+                              placeholder="Last Name"
                               value={lastName}
                               onChange={(e) => setLastName(e.target.value)}
                               className={s.chooseStudent__inputNew}
@@ -157,10 +152,7 @@ const ChooseStudent = ({ setIsUserChosen }) => {
                         </div>
                      </div>
                      <div className={s.chooseStudent__buttons}>
-                        <button
-                           type="submit"
-                           onClick={handleAddStudent}
-                           className={s.chooseStudent__btn}>
+                        <button type="submit" onClick={handleAddStudent} className={s.chooseStudent__btn}>
                            Save
                         </button>
                         <button onClick={handleBack} className={s.chooseStudent__btnBack}>
