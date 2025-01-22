@@ -31,44 +31,26 @@ const NewAnalysis = () => {
       setFileName(file.name);
    };
 
-   const handleSubmit = async (e) => {
-      e.preventDefault();
-      if (currentRubric && fileName && isUserChosen) {
-         setShowVideoEditor(true);
-      }
-   };
+   const getSasForFile = async (filename) => {
+      const functionUrl = `https://dotnet-fapp.azurewebsites.net/api/GetSasToken?code=3-172eA71LvFWcg-aWsKHJlQu_VyQ0aFe9lxR0BrQsAJAzFux1i_pA%3D%3D&filename=${encodeURIComponent(filename)}`;
 
-   const handleAnalyze = async () => {
-      if (isStagesSaved && fileName && videoSrc) {
-         setIsLoading(true);
-         try {
-            const functionUrl = 'https://dotnet-fapp.azurewebsites.net/api/GetSasToken';
-            const functionKey = '3-172eA71LvFWcg-aWsKHJlQu_VyQ0aFe9lxR0BrQsAJAzFux1i_pA%3D%3D';
-            const requestUrl = `${functionUrl}?code=${functionKey}&filename=${encodeURIComponent(fileName)}`;
+      try {
+         const response = await fetch(functionUrl, { method: 'GET' });
 
-            const response = await fetch(requestUrl, { method: 'GET' });
-
-            if (!response.ok) {
-               throw new Error(`Error fetching SAS token: ${response.status}`);
-            }
-
-            const data = await response.json();
-            const sasUrl = data.sas_url;
-
-            console.log('SAS URL retrieved:', sasUrl);
-
-            await uploadFile(videoSrc, sasUrl);
-            toast.success('Video uploaded successfully!');
-         } catch (error) {
-            console.error('Upload failed:', error);
-            toast.error('Failed to upload video.');
-         } finally {
-            setIsLoading(false);
+         if (!response.ok) {
+            throw new Error(`SAS error: HTTP ${response.status}`);
          }
+
+         const data = await response.json();
+         return data.sas_url;
+      } catch (error) {
+         console.error('Error fetching SAS URL:', error);
+         toast.error('Failed to get SAS URL');
+         throw error;
       }
    };
 
-   const uploadFile = async (file, sasUrl) => {
+   const uploadFileToBlob = async (file, sasUrl) => {
       try {
          const response = await fetch(sasUrl, {
             method: 'PUT',
@@ -83,9 +65,36 @@ const NewAnalysis = () => {
             throw new Error(`Upload failed with status: ${response.status}`);
          }
 
-         console.log('File uploaded successfully to:', sasUrl);
+         toast.success('Video uploaded successfully!');
+         return sasUrl;
       } catch (error) {
          console.error('Error uploading file:', error);
+         toast.error('Upload failed');
+         throw error;
+      }
+   };
+
+   const handleSubmit = async (e) => {
+      e.preventDefault();
+      if (currentRubric && fileName && isUserChosen) {
+         setIsLoading(true);
+         toast.info('Getting SAS token...');
+
+         try {
+            const sasUrl = await getSasForFile(fileName);
+
+            if (sasUrl) {
+               toast.success('SAS token received! Uploading...');
+               await uploadFileToBlob(videoSrc, sasUrl);
+               setShowVideoEditor(true);
+            }
+         } catch (error) {
+            toast.error('Error during submission. Check logs.');
+         } finally {
+            setIsLoading(false);
+         }
+      } else {
+         toast.error('Please select a student, rubric, and video before submitting.');
       }
    };
 
@@ -102,17 +111,13 @@ const NewAnalysis = () => {
                         fileName={fileName}
                         setFileName={setFileName}
                      />
-                     <button type="submit" className={s.newAnalysis__submit}>
-                        Submit
+                     <button type="submit" className={s.newAnalysis__submit} disabled={isLoading}>
+                        {isLoading ? 'Uploading...' : 'Submit'}
                      </button>
                   </form>
                ) : (
-                  <button
-                     className={`${s.newAnalysis__submit} ${isLoading ? s.disabled : ''}`}
-                     onClick={handleAnalyze}
-                     disabled={isLoading}
-                  >
-                     {!isLoading ? 'Analyze' : 'Uploading...'}
+                  <button className={`${s.newAnalysis__submit} ${isLoading ? s.disabled : ''}`}>
+                     Analyzing...
                   </button>
                )}
             </div>
