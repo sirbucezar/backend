@@ -33,6 +33,9 @@
     "tailwindcss-animate": "^1.0.7",
     "three": "^0.172.0"
   },
+    "engines": {
+    "node": ">=22.0.0"
+  },
   "devDependencies": {
     "@eslint/js": "^9.18.0",
     "@react-three/eslint-plugin": "^0.1.2",
