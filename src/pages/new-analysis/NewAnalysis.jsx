@@ -115,9 +115,8 @@ const NewAnalysis = () => {
 
          await uploadFileToBlob(rawFile, sas);
          toast.success('Upload complete!');
+         setSasUrl(sas);
 
-         // Save the SAS so we can do the final “process_video” later
-         // setSasUrl(sas);
          setTimeout(() => {
             console.log('done');
          }, 1);
