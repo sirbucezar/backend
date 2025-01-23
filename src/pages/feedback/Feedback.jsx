@@ -15,12 +15,12 @@ const Feedback = ({ rubrics }) => {
          setTitle(rubrics[rubricId].name);
       }
       if (isLoading) {
-         setTimeout(() => {
-            setIsLoading(false);
-            const newScores = [0.5, 0, 1, 1, 1];
-            setScores(newScores);
-            setTotalPoint(newScores.reduce((partialSum, a) => partialSum + a, 0));
-         }, 2000);
+         // setTimeout(() => {
+         setIsLoading(false);
+         const newScores = [0.5, 0, 1, 1, 1];
+         setScores(newScores);
+         setTotalPoint(newScores.reduce((partialSum, a) => partialSum + a, 0));
+         // }, 2000);
       }
    }, []);
 
@@ -31,8 +31,6 @@ const Feedback = ({ rubrics }) => {
             <div className={s.feedback__score}>{totalPoint}/5</div>
          </div>
          <Stages stages={rubrics[rubricId].rubrics} scores={scores} />
-         <p>User ID: {userId}</p>
-         <p>Rubric Name: {rubricId}</p>
       </div>
    );
 };

@@ -54,7 +54,7 @@
       transition: --b1 .5s ease-in-out, --b2 .5s ease-in-out, --a .4s linear, opacity .3s ease-in-out,;
       background: linear-gradient(rgb(24 24 27), rgb(24 24 27)) padding-box, linear-gradient(var(--a), var(--b1) 0%, var(--b2) 100%) border-box;
 
-      &.disabled{
+      &:disabled{
          pointer-events: none;
          opacity: 0.8;
       }

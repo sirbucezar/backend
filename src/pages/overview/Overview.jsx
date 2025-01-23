@@ -13,7 +13,7 @@ import LoginForm from '../../components/login-form/LoginForm';
 const Overview = () => {
    const isSmall = useMediaQuery({ maxWidth: 440 });
    const isMobile = useMediaQuery({ maxWidth: 768 });
-   const isTablet = useMediaQuery({ query: "(min-width: 768px) and (max-width: 1024px)" });
+   const isTablet = useMediaQuery({ maxWidth: 768, maxWidth: 1024 });
 
    const animDuration = 4;
    let timeout;

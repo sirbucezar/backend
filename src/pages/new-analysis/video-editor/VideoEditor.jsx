@@ -3,6 +3,7 @@ import s from './styles.module.scss';
 import VideoTicks from './video-ticks/VideoTicks';
 import VideoInfo from './video-info/VideoInfo';
 import VideoStages from './video-stages/VideoStages';
+import { toast } from 'sonner';
 
 const VideoEditor = ({ videoSrc, setIsStagesSaved, rubric, setRubric }) => {
    const [currentStage, setCurrentStage] = useState(0);
@@ -19,7 +20,7 @@ const VideoEditor = ({ videoSrc, setIsStagesSaved, rubric, setRubric }) => {
    const [dragStartOffset, setDragStartOffset] = useState(0);
    const [frameRate, setFrameRate] = useState(30);
    const [isScrubbing, setIsScrubbing] = useState(false);
-   const minFrameSelect = 10;
+   const minFrameSelect = 5;
    const [videoLength, setVideoLength] = useState(null);
    const [lastChange, setLastChange] = useState(null);
    const [isPlaying, setIsPlaying] = useState(false);
@@ -33,14 +34,23 @@ const VideoEditor = ({ videoSrc, setIsStagesSaved, rubric, setRubric }) => {
             : stage;
       });
       const newRubric = { ...rubric, stages: newStages };
+      toast.success(`Stage ${currentStage + 1} was saved!`);
 
       let rubricSaved = 0;
-      newRubric.stages.map((stage) => {
-         if (stage.start_time !== null && stage.end_time !== null) rubricSaved++;
+      let nextStage = NaN;
+      newRubric.stages.map((stage, index) => {
+         if (stage.start_time !== null && stage.end_time !== null) {
+            rubricSaved++;
+         } else {
+            if (isNaN(nextStage)) {
+               nextStage = index;
+            }
+         }
       });
-      // console.log(rubricSaved);
       if (rubricSaved === newStages.length) {
          setIsStagesSaved(true);
+      } else {
+         handleStageChange(nextStage);
       }
       setRubric(newRubric);
    };
@@ -61,6 +71,7 @@ const VideoEditor = ({ videoSrc, setIsStagesSaved, rubric, setRubric }) => {
 
       if (videoRef.current) {
          videoRef.current.pause();
+         setIsPlaying(false);
       }
    };
 
@@ -88,6 +99,7 @@ const VideoEditor = ({ videoSrc, setIsStagesSaved, rubric, setRubric }) => {
          if (video && !isScrubbing) {
             const percentage = (video.currentTime / video.duration) * 100;
             if (!isDraggingStart && !isDraggingEnd) {
+               setCurrentTime(video.currentTime);
                setProgress(percentage);
             }
          }
@@ -155,9 +167,10 @@ const VideoEditor = ({ videoSrc, setIsStagesSaved, rubric, setRubric }) => {
          const video = videoRef.current;
          if (video) {
             const percentage = (video.currentTime / video.duration) * 100;
-            // if (!isDraggingStart && !isDraggingEnd) {
-            //    console.log(isDraggingStart, isDraggingEnd);
-            // }
+            if (!isDraggingStart && !isDraggingEnd) {
+               // console.log(percentage, progress);
+               // setProgress(percentage);
+            }
          }
       };
 
@@ -171,7 +184,7 @@ const VideoEditor = ({ videoSrc, setIsStagesSaved, rubric, setRubric }) => {
             video.removeEventListener('timeupdate', updateProgress);
          }
       };
-   }, []);
+   }, [isDraggingStart, isDraggingEnd]);
 
    const startScrubbing = (e) => {
       setIsScrubbing(true);
@@ -195,7 +208,7 @@ const VideoEditor = ({ videoSrc, setIsStagesSaved, rubric, setRubric }) => {
 
          const shiftMultiplier = e.shiftKey ? 10 : 1;
          const frameTime = 1 / frameRate; // Time per frame in seconds
-
+         let newCurrentTime;
          switch (e.key.toLowerCase()) {
             case ' ': // Space key to toggle play/pause
                e.preventDefault(); // Prevent default scrolling behavior when pressing space
@@ -203,14 +216,15 @@ const VideoEditor = ({ videoSrc, setIsStagesSaved, rubric, setRubric }) => {
                break;
             case 'a': // Move backward
             case 'arrowleft':
-               video.currentTime = Math.max(video.currentTime - frameTime * shiftMultiplier, 0);
+               newCurrentTime = Math.max(video.currentTime - frameTime * shiftMultiplier, 0);
+               video.currentTime = newCurrentTime;
+               setCurrentTime(newCurrentTime);
                break;
             case 'd': // Move forward
             case 'arrowright':
-               video.currentTime = Math.min(
-                  video.currentTime + frameTime * shiftMultiplier,
-                  duration,
-               );
+               newCurrentTime = Math.min(video.currentTime + frameTime * shiftMultiplier, duration);
+               video.currentTime = newCurrentTime;
+               setCurrentTime(newCurrentTime);
                break;
             case 'b': // create a breakpoint
                if (lastChange) {
@@ -278,6 +292,12 @@ const VideoEditor = ({ videoSrc, setIsStagesSaved, rubric, setRubric }) => {
    }, [isDraggingStart, isDraggingEnd]);
 
    const handleDragStart = (e, type) => {
+      const video = videoRef.current;
+      if (!video) return;
+
+      video.pause();
+      setIsPlaying(false);
+
       if (type === 'start') {
          setIsDraggingStart(true);
          setLastChange('start');
@@ -359,91 +379,97 @@ const VideoEditor = ({ videoSrc, setIsStagesSaved, rubric, setRubric }) => {
             saveStage={saveStage}
             handleStageChange={handleStageChange}
          />
-         <div className={s.videoEditor__body}>
-            <VideoInfo />
-            <video
-               ref={videoRef}
-               src={videoSrc}
-               // controls
-               className={s.videoEditor__video}
-               controls={false}></video>
-            <div className={s.videoEditor__controls} onClick={togglePlayPause}>
-               <button
-                  className={`${s.videoEditor__playPause} ${isPlayingChanged ? s.active : ''}`}>
-                  {isPlaying ? (
-                     <svg
-                        width="24"
-                        height="24"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        xmlns="http://www.w3.org/2000/svg">
-                        <path
-                           fill="#f1f1f1"
-                           d="M6 3L20 12L6 21V3Z"
-                           strokeWidth="2"
-                           strokeLinecap="round"
-                           strokeLinejoin="round"
-                        />
-                     </svg>
-                  ) : (
-                     <svg
-                        width="24"
-                        height="24"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        xmlns="http://www.w3.org/2000/svg">
-                        <path
-                           fill="#f1f1f1"
-                           d="M17 4H15C14.4477 4 14 4.44772 14 5V19C14 19.5523 14.4477 20 15 20H17C17.5523 20 18 19.5523 18 19V5C18 4.44772 17.5523 4 17 4Z"
-                           strokeWidth="2"
-                           strokeLinecap="round"
-                           strokeLinejoin="round"
-                        />
-                        <path
-                           fill="#f1f1f1"
-                           d="M9 4H7C6.44772 4 6 4.44772 6 5V19C6 19.5523 6.44772 20 7 20H9C9.55228 20 10 19.5523 10 19V5C10 4.44772 9.55228 4 9 4Z"
-                           strokeWidth="2"
-                           strokeLinecap="round"
-                           strokeLinejoin="round"
-                        />
-                     </svg>
-                  )}
-               </button>
+         <div className={s.videoEditor__main}>
+            <div className={s.videoEditor__body}>
+               <VideoInfo />
+               <video
+                  ref={videoRef}
+                  src={videoSrc}
+                  // controls
+                  className={s.videoEditor__video}
+                  controls={false}></video>
+               <div className={s.videoEditor__controls} onClick={togglePlayPause}>
+                  <button
+                     className={`${s.videoEditor__playPause} ${isPlayingChanged ? s.active : ''}`}>
+                     {isPlaying ? (
+                        <svg
+                           width="24"
+                           height="24"
+                           viewBox="0 0 24 24"
+                           fill="none"
+                           xmlns="http://www.w3.org/2000/svg">
+                           <path
+                              fill="#f1f1f1"
+                              d="M6 3L20 12L6 21V3Z"
+                              strokeWidth="2"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                           />
+                        </svg>
+                     ) : (
+                        <svg
+                           width="24"
+                           height="24"
+                           viewBox="0 0 24 24"
+                           fill="none"
+                           xmlns="http://www.w3.org/2000/svg">
+                           <path
+                              fill="#f1f1f1"
+                              d="M17 4H15C14.4477 4 14 4.44772 14 5V19C14 19.5523 14.4477 20 15 20H17C17.5523 20 18 19.5523 18 19V5C18 4.44772 17.5523 4 17 4Z"
+                              strokeWidth="2"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                           />
+                           <path
+                              fill="#f1f1f1"
+                              d="M9 4H7C6.44772 4 6 4.44772 6 5V19C6 19.5523 6.44772 20 7 20H9C9.55228 20 10 19.5523 10 19V5C10 4.44772 9.55228 4 9 4Z"
+                              strokeWidth="2"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                           />
+                        </svg>
+                     )}
+                  </button>
+               </div>
             </div>
-         </div>
-         <VideoTicks duration={duration} startScrubbing={startScrubbing} />
-         <div ref={trackRef} className={s.videoEditor__track}>
-            {/* Range Highlight */}
-            <div
-               className={s.videoEditor__rangeHighlight}
-               style={{
-                  left: `${calculatePositionPercentage(startFrame)}%`,
-                  width: `${calculatePositionPercentage(endFrame - startFrame)}%`,
-               }}
-               // onMouseDown={(e) => handleDragStart(e, 'range')}
-               // onTouchStart={(e) => handleDragStart(e, 'range')}
-            ></div>
-            <div>
-               {/* Start Handle */}
+            <VideoTicks duration={duration} startScrubbing={startScrubbing} />
+            <div ref={trackRef} className={s.videoEditor__track}>
+               {/* Range Highlight */}
                <div
-                  className={s.videoEditor__rangeHandle}
-                  style={{ left: `${calculatePositionPercentage(startFrame)}%` }}
-                  onMouseDown={(e) => handleDragStart(e, 'start')}
-                  onTouchStart={(e) => handleDragStart(e, 'start')}></div>
+                  className={s.videoEditor__rangeHighlight}
+                  style={{
+                     left: `${calculatePositionPercentage(startFrame)}%`,
+                     width: `${calculatePositionPercentage(endFrame - startFrame)}%`,
+                  }}
+                  // onMouseDown={(e) => handleDragStart(e, 'range')}
+                  // onTouchStart={(e) => handleDragStart(e, 'range')}
+               ></div>
+               <div>
+                  {/* Start Handle */}
+                  <div
+                     className={s.videoEditor__rangeHandle}
+                     style={{ left: `${calculatePositionPercentage(startFrame)}%` }}
+                     onMouseDown={(e) => handleDragStart(e, 'start')}
+                     onTouchStart={(e) => handleDragStart(e, 'start')}>
+                     <div className={s.videoEditor__handleSmall}></div>
+                  </div>
 
-               {/* End Handle */}
-               <div
-                  className={s.videoEditor__rangeHandle}
-                  style={{ left: `${calculatePositionPercentage(endFrame)}%` }}
-                  onMouseDown={(e) => handleDragStart(e, 'end')}
-                  onTouchStart={(e) => handleDragStart(e, 'end')}></div>
-            </div>
+                  {/* End Handle */}
+                  <div
+                     className={s.videoEditor__rangeHandle}
+                     style={{ left: `${calculatePositionPercentage(endFrame)}%` }}
+                     onMouseDown={(e) => handleDragStart(e, 'end')}
+                     onTouchStart={(e) => handleDragStart(e, 'end')}>
+                     <div className={s.videoEditor__handleSmall}></div>
+                  </div>
+               </div>
 
-            {/* Progress */}
-            <div className={s.videoEditor__progress} style={{ left: `${progress}%` }}>
-               <div className={s.videoEditor__progressBody}>
-                  <div className={s.videoEditor__progressTriangle}></div>
-                  <div className={s.videoEditor__progressLine}></div>
+               {/* Progress */}
+               <div className={s.videoEditor__progress} style={{ left: `${progress}%` }}>
+                  <div className={s.videoEditor__progressBody}>
+                     <div className={s.videoEditor__progressTriangle}></div>
+                     <div className={s.videoEditor__progressLine}></div>
+                  </div>
                </div>
             </div>
          </div>

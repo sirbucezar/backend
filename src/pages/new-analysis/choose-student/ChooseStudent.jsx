@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import s from './styles.module.scss';
+import { toast } from 'sonner';
 
 const ChooseStudent = ({ setSelectedStudent }) => {
    const [students, setStudents] = useState([
@@ -16,21 +17,26 @@ const ChooseStudent = ({ setSelectedStudent }) => {
    const [isNewStudentDropdownOpen, setNewStudentIsDropdownOpen] = useState(false);
    const [firstName, setFirstName] = useState('');
    const [lastName, setLastName] = useState('');
-   const selectRef = useRef(null);
+   const selectRef = useRef(null); // Reference to the dropdown container
 
    const filteredStudents = students.filter((student) =>
-      `${student.firstName} ${student.lastName}`.toLowerCase().includes(searchTerm.toLowerCase())
+      `${student.firstName} ${student.lastName}`.toLowerCase().includes(searchTerm.toLowerCase()),
    );
 
-   const handleAddStudent = (e) => {
-      e.preventDefault();
+   const handleAddStudent = () => {
       if (firstName.trim() !== '' && lastName.trim() !== '') {
          setStudents([
             ...students,
-            { id: Date.now(), firstName: firstName.trim(), lastName: lastName.trim(), isSelected: false },
+            {
+               id: Date.now(),
+               firstName: firstName.trim(),
+               lastName: lastName.trim(),
+               isSelected: false,
+            },
          ]);
          setSearchTerm('');
          setNewStudentIsDropdownOpen(false);
+         toast.success(`Student ${firstName.trim()} ${lastName.trim()} was added!`);
       }
    };
 
@@ -42,6 +48,7 @@ const ChooseStudent = ({ setSelectedStudent }) => {
    };
 
    const handleClickOutside = (event) => {
+      // Check if the click is outside the dropdown and not on a child element
       if (selectRef.current && !selectRef.current.contains(event.target)) {
          setIsDropdownOpen(false);
          setNewStudentIsDropdownOpen(false);
@@ -67,8 +74,7 @@ const ChooseStudent = ({ setSelectedStudent }) => {
       setLastName('');
    };
 
-   const handleBack = (e) => {
-      e.preventDefault();
+   const handleBack = () => {
       setSearchTerm('');
       setNewStudentIsDropdownOpen(false);
    };
@@ -97,7 +103,8 @@ const ChooseStudent = ({ setSelectedStudent }) => {
                            />
                         </svg>
                      </div>
-                     <div className={`${s.chooseStudent__search} ${isDropdownOpen ? s.active : ''}`}>
+                     <div
+                        className={`${s.chooseStudent__search} ${isDropdownOpen ? s.active : ''}`}>
                         <input
                            type="text"
                            placeholder="Search for a student..."
@@ -116,7 +123,9 @@ const ChooseStudent = ({ setSelectedStudent }) => {
                            filteredStudents.map((student) => (
                               <div
                                  key={student.id}
-                                 className={`${s.chooseStudent__item} ${student.isSelected ? s.active : ''}`}
+                                 className={`${s.chooseStudent__item} ${
+                                    student.isSelected ? s.active : ''
+                                 }`}
                                  onClick={() => handleSelectStudent(student)}>
                                  {student.firstName} {student.lastName}
                               </div>
@@ -129,7 +138,10 @@ const ChooseStudent = ({ setSelectedStudent }) => {
                         <span></span>Add a new student
                      </button>
                   </div>
-                  <form className={`${s.chooseStudent__new} ${isNewStudentDropdownOpen ? s.active : ''}`}>
+                  <div
+                     className={`${s.chooseStudent__new} ${
+                        isNewStudentDropdownOpen ? s.active : ''
+                     }`}>
                      <div className={s.chooseStudent__labelNew}>Add a new student</div>
                      <div className={s.chooseStudent__inputs}>
                         <div className={s.chooseStudent__inputNewWrapper}>
@@ -144,7 +156,7 @@ const ChooseStudent = ({ setSelectedStudent }) => {
                         <div className={s.chooseStudent__inputNewWrapper}>
                            <input
                               type="text"
-                              placeholder="Last Name"
+                              placeholder="Second Name"
                               value={lastName}
                               onChange={(e) => setLastName(e.target.value)}
                               className={s.chooseStudent__inputNew}
@@ -152,14 +164,14 @@ const ChooseStudent = ({ setSelectedStudent }) => {
                         </div>
                      </div>
                      <div className={s.chooseStudent__buttons}>
-                        <button type="submit" onClick={handleAddStudent} className={s.chooseStudent__btn}>
+                        <button onClick={handleAddStudent} className={s.chooseStudent__btn}>
                            Save
                         </button>
                         <button onClick={handleBack} className={s.chooseStudent__btnBack}>
                            Back
                         </button>
                      </div>
-                  </form>
+                  </div>
                </div>
             </div>
          </div>

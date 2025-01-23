@@ -1,9 +1,15 @@
 // base
-
 @use './global' as *;
+
 @forward './fonts';
 @forward './zeroing';
 @forward './main';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
 // global styles
 ._container {
    max-width: $width + px;
