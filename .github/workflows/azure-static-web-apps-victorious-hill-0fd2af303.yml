@@ -24,6 +24,11 @@ jobs:
           submodules: true
           lfs: false
 
+      - name: Use Node 22
+        uses: actions/setup-node@v3
+        with:
+            node-version: '22.x'
+  
       - name: Remove package-lock.json (if exists)
         run: rm -f package-lock.json
 
@@ -69,3 +74,5 @@ jobs:
         uses: Azure/static-web-apps-deploy@v1
         with:
           action: "close"
+
+
