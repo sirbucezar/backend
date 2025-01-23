@@ -84,6 +84,7 @@ const NewAnalysis = () => {
       const fileURL = URL.createObjectURL(file);
       setVideoSrc(fileURL);
       setFileName(file.name);
+      setRawFile(file);
       toast.success(`Video ${file.name} was selected!`);
 
       // * local
