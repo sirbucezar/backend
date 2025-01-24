@@ -86,7 +86,7 @@ const NewAnalysis = ({ showVideoEditor, setShowVideoEditor }) => {
       toast.success(`Video ${file.name} was selected!`);
 
       // * local
-      // setShowVideoEditor(true);
+      setShowVideoEditor(true);
    };
 
    const handleSubmit = async (e) => {

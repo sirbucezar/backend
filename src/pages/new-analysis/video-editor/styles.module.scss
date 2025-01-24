@@ -19,6 +19,22 @@
       // padding: 20px 0;
    }
 
+   &__trackWrapper{
+      
+
+      &.zoomLevel0{
+         width: 100%;
+      }
+      
+      &.zoomLevel1{
+         width: 150%;
+      }
+
+      &.zoomLevel2{
+         width: 200%;
+      }
+   }
+
    &__body {
       width: 100%;
       position: relative;
@@ -91,6 +107,30 @@
    &__bottom {
       padding: 16px 24px;
       // background-color: #303030;
+      overflow-x: auto;
+      // scroll-behavior: smooth;
+
+      &::selection {
+         -webkit-text-fill-color: rgb(24 24 27);
+         color: rgb(24 24 27);
+         background-color: #1F1F23; 
+      }
+      
+      &::-webkit-scrollbar {
+         width: 0px;
+         height: 0;
+         display: none;
+      }
+      &::-webkit-scrollbar-track {
+         background: rgb(24 24 27);
+      }
+      &::-webkit-scrollbar-thumb {
+         background: #1F1F23;
+         border-radius: 6px;
+      }
+      &::-webkit-scrollbar-thumb:hover {
+         background: #1F1F23;
+      }
    }
 
    &__track {

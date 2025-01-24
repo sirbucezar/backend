@@ -20,13 +20,20 @@ const VideoEditor = ({ videoSrc, setIsStagesSaved, rubric, setRubric }) => {
    const [dragStartOffset, setDragStartOffset] = useState(0);
    const [frameRate, setFrameRate] = useState(30);
    const [isScrubbing, setIsScrubbing] = useState(false);
-   const minFrameSelect = 5;
+   const minFrameSelect = 3;
    const [videoLength, setVideoLength] = useState(null);
    const [lastChange, setLastChange] = useState(null);
    const [isPlaying, setIsPlaying] = useState(false);
    const [isPlayingChanged, setIsPlayingChanged] = useState(false);
    const [currentTime, setCurrentTime] = useState(0);
-   const StickyThreshold = 0.5; // Adjust the threshold in seconds to define proximity
+   const StickyThreshold = 0.2; // Adjust the threshold in seconds to define proximity
+
+   // Define zoom scale levels
+   const zoomScales = [1, 1.5, 2]; // Corresponding to zoom levels 0, 1, 2
+   const [zoomLevel, setZoomLevel] = useState(0); // 0: normal, 1: zoom in, 2: zoom in more
+   const scrollIntervalRef = useRef(null);
+   const bottomContainerRef = useRef(null);
+   const progressRef = useRef(null);
 
    const saveStage = () => {
       const newStages = rubric.stages.map((stage, index) => {
@@ -119,6 +126,23 @@ const VideoEditor = ({ videoSrc, setIsStagesSaved, rubric, setRubric }) => {
    }, [isScrubbing, isDraggingStart, isDraggingEnd]);
 
    const handleScrub = (e) => {
+      // const track = trackRef.current;
+      // const video = videoRef.current;
+
+      // if (track && video) {
+      //    const rect = track.getBoundingClientRect();
+      //    const clientX = e.clientX || e.touches[0].clientX;
+      //    const clickX = Math.max(0, Math.min(clientX - rect.left, rect.width));
+      //    const clickPercentage = clickX / rect.width;
+      //    video.currentTime = clickPercentage * video.duration;
+      //    if (!isDraggingStart && !isDraggingEnd) {
+      //       setProgress(clickPercentage * 100);
+      //       const newCurrentTime = video.currentTime;
+
+      //       setCurrentTime(newCurrentTime);
+      //    }
+      // }
+
       const track = trackRef.current;
       const video = videoRef.current;
 
@@ -140,8 +164,10 @@ const VideoEditor = ({ videoSrc, setIsStagesSaved, rubric, setRubric }) => {
          }
 
          video.currentTime = newCurrentTime;
-         setCurrentTime(newCurrentTime);
-         setProgress((newCurrentTime / video.duration) * 100);
+         if (!isDraggingStart && !isDraggingEnd) {
+            setCurrentTime(newCurrentTime);
+            setProgress((newCurrentTime / video.duration) * 100);
+         }
       }
    };
 
@@ -252,6 +278,13 @@ const VideoEditor = ({ videoSrc, setIsStagesSaved, rubric, setRubric }) => {
                   }
                }
                break;
+            case '+':
+            case '=':
+               handleZoom('in');
+               break;
+            case '-':
+               handleZoom('out');
+               break;
             default:
                break;
          }
@@ -320,6 +353,7 @@ const VideoEditor = ({ videoSrc, setIsStagesSaved, rubric, setRubric }) => {
 
    const handleDragging = (e) => {
       const track = trackRef.current;
+      const bottomContainer = document.querySelector(`.${s.videoEditor__bottom}`);
 
       if (track) {
          const rect = track.getBoundingClientRect();
@@ -339,6 +373,29 @@ const VideoEditor = ({ videoSrc, setIsStagesSaved, rubric, setRubric }) => {
                setEndFrame(newFrame);
             }
          }
+
+         // Convert position to percentage
+         const handlePositionPercent = (positionX / rect.width) * 100;
+         const containerScrollPercent =
+            (bottomContainer.scrollLeft / bottomContainer.scrollWidth) * 100;
+         const containerVisiblePercent =
+            (bottomContainer.clientWidth / bottomContainer.scrollWidth) * 100;
+
+         // Adjust scrolling using percentage logic
+
+         // Clear any existing interval to prevent multiple calls
+         clearInterval(scrollIntervalRef.current);
+
+         // Start automatic scrolling if the handle is near the edges
+         if (handlePositionPercent < containerScrollPercent + 2) {
+            scrollIntervalRef.current = setInterval(() => {
+               bottomContainer.scrollLeft -= bottomContainer.scrollWidth * 0.002; // Scroll left smoothly
+            }, 10);
+         } else if (handlePositionPercent > containerScrollPercent + containerVisiblePercent - 2) {
+            scrollIntervalRef.current = setInterval(() => {
+               bottomContainer.scrollLeft += bottomContainer.scrollWidth * 0.002; // Scroll right smoothly
+            }, 10);
+         }
       }
    };
 
@@ -351,12 +408,54 @@ const VideoEditor = ({ videoSrc, setIsStagesSaved, rubric, setRubric }) => {
 
       video.currentTime = currentTime;
 
+      // Clear the scrolling interval when dragging ends
+      clearInterval(scrollIntervalRef.current);
+
       // console.log(`Start Frame: ${startFrame}, End Frame: ${endFrame}`);
    };
 
    const calculatePositionPercentage = (frame) => {
       const totalFrames = Math.floor(duration * frameRate);
       return (frame / totalFrames) * 100;
+   };
+
+   const handleZoom = (direction) => {
+      if (!bottomContainerRef.current || !progressRef.current) return;
+
+      const bottomContainer = bottomContainerRef.current;
+      const progressIndicator = progressRef.current;
+
+      // Get current zoom level and determine new zoom level
+      setZoomLevel((prevZoom) => {
+         const newZoom = direction === 'in' ? Math.min(prevZoom + 1, 2) : Math.max(prevZoom - 1, 0);
+
+         return newZoom;
+      });
+
+      setTimeout(() => {
+         // Get progress indicator position relative to the track
+         const progressRect = progressIndicator.getBoundingClientRect();
+         const bottomContainerRect = bottomContainer.getBoundingClientRect();
+
+         const progressCenterPosition = progressRect.left + progressRect.width / 2;
+         const bottomContainerCenterPosition =
+            bottomContainerRect.left + bottomContainer.clientWidth / 2;
+
+         let scrollOffset = progressCenterPosition - bottomContainerCenterPosition;
+
+         // Ensure it stays within bounds of the container
+         if (progressRect.left < bottomContainerRect.left) {
+            scrollOffset = progressRect.left - bottomContainerRect.left;
+         } else if (progressRect.right > bottomContainerRect.right) {
+            scrollOffset = bottomContainerRect.right + bottomContainer.scrollLeft;
+         }
+
+         // Smoothly scroll to the calculated position
+         bottomContainer.scrollBy({
+            left: scrollOffset,
+            behavior: 'smooth',
+         });
+      }, 0);
    };
 
    const togglePlayPause = () => {
@@ -441,44 +540,49 @@ const VideoEditor = ({ videoSrc, setIsStagesSaved, rubric, setRubric }) => {
                   </button>
                </div>
             </div>
-            <div className={s.videoEditor__bottom}>
-               <VideoTicks duration={duration} startScrubbing={startScrubbing} />
-               <div ref={trackRef} className={s.videoEditor__track}>
-                  {/* Range Highlight */}
-                  <div
-                     className={s.videoEditor__rangeHighlight}
-                     style={{
-                        left: `${calculatePositionPercentage(startFrame)}%`,
-                        width: `${calculatePositionPercentage(endFrame - startFrame)}%`,
-                     }}
-                     // onMouseDown={(e) => handleDragStart(e, 'range')}
-                     // onTouchStart={(e) => handleDragStart(e, 'range')}
-                  ></div>
-                  <div>
-                     {/* Start Handle */}
+            <div className={s.videoEditor__bottom} ref={bottomContainerRef}>
+               <div className={`${s.videoEditor__trackWrapper} ${s[`zoomLevel${zoomLevel}`]}`}>
+                  <VideoTicks duration={duration} startScrubbing={startScrubbing} />
+                  <div ref={trackRef} className={s.videoEditor__track}>
+                     {/* Range Highlight */}
                      <div
-                        className={s.videoEditor__rangeHandle}
-                        style={{ left: `${calculatePositionPercentage(startFrame)}%` }}
-                        onMouseDown={(e) => handleDragStart(e, 'start')}
-                        onTouchStart={(e) => handleDragStart(e, 'start')}>
-                        <div className={s.videoEditor__handleSmall}></div>
+                        className={s.videoEditor__rangeHighlight}
+                        style={{
+                           left: `${calculatePositionPercentage(startFrame)}%`,
+                           width: `${calculatePositionPercentage(endFrame - startFrame)}%`,
+                        }}
+                        // onMouseDown={(e) => handleDragStart(e, 'range')}
+                        // onTouchStart={(e) => handleDragStart(e, 'range')}
+                     ></div>
+                     <div>
+                        {/* Start Handle */}
+                        <div
+                           className={s.videoEditor__rangeHandle}
+                           style={{ left: `${calculatePositionPercentage(startFrame)}%` }}
+                           onMouseDown={(e) => handleDragStart(e, 'start')}
+                           onTouchStart={(e) => handleDragStart(e, 'start')}>
+                           <div className={s.videoEditor__handleSmall}></div>
+                        </div>
+
+                        {/* End Handle */}
+                        <div
+                           className={s.videoEditor__rangeHandle}
+                           style={{ left: `${calculatePositionPercentage(endFrame)}%` }}
+                           onMouseDown={(e) => handleDragStart(e, 'end')}
+                           onTouchStart={(e) => handleDragStart(e, 'end')}>
+                           <div className={s.videoEditor__handleSmall}></div>
+                        </div>
                      </div>
 
-                     {/* End Handle */}
+                     {/* Progress */}
                      <div
-                        className={s.videoEditor__rangeHandle}
-                        style={{ left: `${calculatePositionPercentage(endFrame)}%` }}
-                        onMouseDown={(e) => handleDragStart(e, 'end')}
-                        onTouchStart={(e) => handleDragStart(e, 'end')}>
-                        <div className={s.videoEditor__handleSmall}></div>
-                     </div>
-                  </div>
-
-                  {/* Progress */}
-                  <div className={s.videoEditor__progress} style={{ left: `${progress}%` }}>
-                     <div className={s.videoEditor__progressBody}>
-                        <div className={s.videoEditor__progressTriangle}></div>
-                        <div className={s.videoEditor__progressLine}></div>
+                        ref={progressRef}
+                        className={s.videoEditor__progress}
+                        style={{ left: `${progress}%` }}>
+                        <div className={s.videoEditor__progressBody}>
+                           <div className={s.videoEditor__progressTriangle}></div>
+                           <div className={s.videoEditor__progressLine}></div>
+                        </div>
                      </div>
                   </div>
                </div>
