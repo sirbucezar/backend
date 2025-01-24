@@ -3,19 +3,20 @@
    flex-direction: column;
    align-items: center;
    width: 100%;
-   
+
    // background: rgb(24 24 27);
    // border-radius: 8px;
    height: 100%;
-   
+
    // margin: 0px 0px 30px 0px;
 
-   &__main{
+   &__main {
       width: 100%;
       // background: #303030;
       background: rgb(24 24 27);
       border-radius: 16px;
-      padding: 20px;
+      overflow: hidden;
+      // padding: 20px 0;
    }
 
    &__body {
@@ -23,7 +24,7 @@
       position: relative;
       width: 100%;
       padding-top: 56.25%; // This is 16:9 aspect ratio (9 / 16 = 0.5625 * 100%)
-      background: #232323; // Black bars
+      background: rgb(24, 24, 27); // Black bars
       display: flex;
       justify-content: center;
       align-items: center;
@@ -41,7 +42,7 @@
       object-fit: contain;
    }
 
-   &__controls{
+   &__controls {
       position: absolute;
       top: 0;
       left: 0;
@@ -54,94 +55,52 @@
       align-items: center;
    }
 
-   &__playPause{
+   &__playPause {
       width: 60px;
       height: 60px;
       border-radius: 50%;
-      background: rgba(#1A171A, 0.8);
+      background: rgba(#1a171a, 0.8);
       display: flex;
       justify-content: center;
       align-items: center;
       opacity: 0;
-      svg{
-         path{
+      svg {
+         path {
             stroke: transparent;
          }
       }
 
-      &.active{
+      &.active {
          // background: red;
 
          // transition: all .3s ease-in-out;
-         animation: playPause .5s ease-in-out;
+         animation: playPause 0.5s ease-in-out;
       }
       @keyframes playPause {
-         0%{
+         0% {
             opacity: 0.9;
             transform: scale(1);
          }
-         100%{
+         100% {
             opacity: 0;
             transform: scale(1.6);
          }
       }
    }
 
+   &__bottom {
+      padding: 16px 24px;
+      // background-color: #303030;
+   }
+
    &__track {
       position: relative;
       width: 100%;
       height: 70px;
-      background-color: #303030;
+      background: rgba(35, 35, 35, 0.3);
       border: 1px solid rgba(35, 35, 35, 0.3);
       // border-radius: 5px;
       // cursor: pointer;
-   }
-
-   &__trackTop {
-      position: relative;
-      width: 100%;
-      height: 30px;
-      z-index: 11;
-      background-color: #303030;
-      border-bottom: 1px solid rgba(35, 35, 35, 0.3);
-      // border-radius: 5px;
-      // cursor: pointer;
-   }
-
-
-   &__tick {
-      position: absolute;
-      top: 0;
-      height: 100%;
-      width: 1px;
-      background-color: #555;
-      display: flex;
-      justify-content: center;
-      align-items: flex-end;
-      &:first-child{
-         span{
-            transform: translateX(calc(50% + 2px));
-            padding: 4px 0 4px 4px;
-         }
-      }
-
-      &:last-child{
-         transform: translateX(-1px);
-         span{
-            transform: translateX(calc(-50% - 2px));
-            padding: 4px 4px 4px 0;
-         }
-      }
-   }
-
-   &__timestamp {
-      font-size: 10px;
-      color: #aaa;
-      position: absolute;
-      top: 0px;
-      background-color: #303030;
-      padding: 4px 0;
-      // transform: translateX(-50%);
    }
 
    &__rangeHandle {
@@ -152,20 +111,20 @@
       z-index: 12;
       user-select: none;
       border-radius: 4px 0 0 4px;
-      background-color: #FFCC33;
-      &:last-child{
-         transform: translateX(-100%);
+      background-color: #ffcc33;
+      transform: translateX(-100%);
+      &:last-child {
+         transform: translateX(0%);
          border-radius: 0 4px 4px 0;
       }
-      
    }
 
-   &__handleSmall{
+   &__handleSmall {
       position: relative;
       width: 100%;
       height: 100%;
-      
-      &:after{
+
+      &:after {
          content: '';
          position: absolute;
          top: 50%;
@@ -173,17 +132,16 @@
          width: 300%;
          height: 110%;
          transform-origin: center;
-         transform: translate(-50% , -50%);
+         transform: translate(-50%, -50%);
          // background: #000;
       }
-      
    }
 
    &__rangeHighlight {
       position: absolute;
       top: 0;
       height: 100%;
-      background-color: rgba(#FFCC33, 0.1);
+      background-color: rgba(#ffcc33, 0.1);
       pointer-events: auto;
       // cursor: move;
       pointer-events: none;
@@ -200,21 +158,21 @@
       pointer-events: none;
    }
 
-   &__progressBody{
+   &__progressBody {
       position: relative;
       height: 100%;
       z-index: 20;
       user-select: none;
    }
 
-   &__progressLine{
+   &__progressLine {
       height: 100%;
       width: 2px;
-      background-color: #E98EED;
+      background-color: #e98eed;
       // transform: translateX(-50%);
    }
 
-   &__progressTriangle{
+   &__progressTriangle {
       position: absolute;
       left: 50%;
       top: -10px;
@@ -223,7 +181,7 @@
       height: 0px;
       border-style: solid;
       border-width: 0 6px 16px 6px;
-      border-color: transparent transparent #E98EED transparent;
+      border-color: transparent transparent #e98eed transparent;
       // transform: rotate(180deg);
    }
 }

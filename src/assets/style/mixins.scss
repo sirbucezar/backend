@@ -61,12 +61,14 @@
     }
  }
  
+ $widthAd: 1920;
+ $maxWidth: 1920;
  @mixin adaptiv-value($value, $pcSize, $mobSize, $maxSize) {
     $addSize: $pcSize - $mobSize;
     @if $maxSize==1 {
        #{$value}: $pcSize + px;
-       @media (max-width: #{$width + px}) {
-          #{$value}: calc(#{$mobSize + px} + #{$addSize} * ((100vw - 320px) / #{$width - 320}));
+       @media (max-width: #{$widthAd + px}) {
+          #{$value}: calc(#{$mobSize + px} + #{$addSize} * ((100vw - 320px) / #{$widthAd - 320}));
        }
     } @else {
        #{$value}: calc(#{$mobSize + px} + #{$addSize} * ((100vw - 320px) / #{$maxWidth - 320}));

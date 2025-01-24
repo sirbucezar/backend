@@ -9,6 +9,7 @@ import s from './styles.module.scss';
 import { Toaster } from 'sonner';
 
 const MainPage = () => {
+   const [showVideoEditor, setShowVideoEditor] = useState(false);
    const [rubrics, setRubrics] = useState([
       {
          id: 0,
@@ -56,7 +57,7 @@ const MainPage = () => {
       },
       {
          id: 4,
-         name: 'Hurdles (official spacing)',
+         name: 'Hurdles',
          rubrics: [
             '8 steps in approach',
             'First hurdle cleared',
@@ -116,9 +117,17 @@ const MainPage = () => {
          <Toaster richColors position="bottom-right" className="toaster" />
          <div className={s.mainPage}>
             <div className={`${s.mainPage__container} _container`}>
-               <TopBar />
+               {!showVideoEditor && <TopBar />}
                <Routes>
-                  <Route path="/" element={<NewAnalysis />} />
+                  <Route
+                     path="/"
+                     element={
+                        <NewAnalysis
+                           showVideoEditor={showVideoEditor}
+                           setShowVideoEditor={setShowVideoEditor}
+                        />
+                     }
+                  />
                   <Route path="/history" element={<History />} />
                   <Route
                      path="/feedback/:userId/:rubricId"

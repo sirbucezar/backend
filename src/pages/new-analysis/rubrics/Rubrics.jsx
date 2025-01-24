@@ -7,7 +7,7 @@ const Rubrics = ({ currentRubric, setCurrentRubric }) => {
       { id: 1, name: 'Sprint' },
       { id: 2, name: 'Shot Put' },
       { id: 3, name: 'Height Jump' },
-      { id: 4, name: 'Hurdles (official spacing)' },
+      { id: 4, name: 'Hurdles' },
       { id: 5, name: 'Long Jump' },
       { id: 6, name: 'Discus Throw' },
       { id: 7, name: 'Javelin Throw' },

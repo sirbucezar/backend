@@ -8,9 +8,7 @@ import { toast } from 'sonner';
 import { useNavigate } from 'react-router';
 import Sidebar from './sidebar/Sidebar';
 
-const NewAnalysis = () => {
-   const [showVideoEditor, setShowVideoEditor] = useState(false);
-
+const NewAnalysis = ({ showVideoEditor, setShowVideoEditor }) => {
    // Student, Sport, and local video states
    const [selectedStudent, setSelectedStudent] = useState('');
    const [currentRubric, setCurrentRubric] = useState(null);
@@ -116,10 +114,6 @@ const NewAnalysis = () => {
          await uploadFileToBlob(rawFile, sas);
          toast.success('Upload complete!');
          setSasUrl(sas);
-
-         setTimeout(() => {
-            console.log('done');
-         }, 1);
 
          // Show the editor now that the video is in Azure
          setShowVideoEditor(true);

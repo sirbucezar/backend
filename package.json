@@ -17,6 +17,7 @@
     "axios": "^1.7.9",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "framer-motion": "^12.0.3",
     "gsap": "^3.12.7",
     "leva": "^0.9.35",
     "lucide-react": "^0.473.0",

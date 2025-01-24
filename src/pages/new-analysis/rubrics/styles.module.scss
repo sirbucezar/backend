@@ -1,5 +1,7 @@
+@use '../../../assets/style/global.scss' as *;
+
 .rubrics{
-   flex: 1 1 100%;
+   flex: 1 1 auto;
 
    &__list{
       display: grid;
@@ -19,6 +21,22 @@
       cursor: pointer;
       transition: all .3s ease-in-out;
 
+      @media (max-width: 1600px){
+         height: 220px;
+      }
+
+      @media (max-width: $md1+px){
+         height: 180px;
+      }
+
+      @media (max-width: $md2+px){
+         height: 140px;
+      }
+
+      @media (max-width: $md4+px){
+         height: 120px;
+      }
+
       &.active{
          background: #E98EED;
       }
@@ -30,5 +48,15 @@
       color: #f1f1f1;
       line-height: 1.2;
       text-align: center;
+
+      @media (max-width: $md1+px){
+         font-size: 20px;
+      }
+      @media (max-width: $md2+px){
+         font-size: 18px;
+      }
+      @media (max-width: $md4+px){
+         font-size: 16px;
+      }
    }
 }

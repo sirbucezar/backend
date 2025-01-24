@@ -1,3 +1,5 @@
+@use '../../../../assets/style/global.scss' as *;
+
 .videoStages{
    width: 100%;
    margin: 0px 0px 12px 0px;
@@ -7,6 +9,10 @@
       background: rgb(24 24 27);
       padding: 20px;
       border-radius: 50px;
+
+      @media (max-width: 1600px){
+         padding: 12px 14px;
+      }
    }
 
    &__list{
@@ -17,6 +23,11 @@
       gap: 10px;
       border-radius: 30px;
       padding: 10px 12px;
+
+      @media (max-width: 1600px){
+         padding: 8px 10px;
+      }
+
    }
 
    &__item{
@@ -32,6 +43,11 @@
       border-radius: 50%;
       cursor: pointer;
       transition: all .3s ease-in-out;
+
+      @media (max-width: 1600px){
+         width: 34px;
+         height: 34px;
+      }
 
       &.completed{
          background: #52D930;
@@ -49,7 +65,7 @@
    }
 
    &__save{
-      height: 60px;
+      // height: 60px;
       padding: 0 32px;
       display: flex;
       justify-content: center;
@@ -60,6 +76,10 @@
       border-radius: 30px;
       border: 2px solid rgba(238, 238, 238, 0.15);
       transition: all .3s ease-in-out;
+
+      @media (max-width: 1600px){
+         padding: 0 28px;
+      }
 
       @media(any-hover: hover){
          &:hover{

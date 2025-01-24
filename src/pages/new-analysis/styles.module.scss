@@ -1,3 +1,5 @@
+@use '../../assets/style/global.scss' as *;
+
 @property --b1 {
    syntax: '<color>';
    inherits: false;
@@ -18,12 +20,21 @@
 .newAnalysis{
    // background: #242124;
    height: 100%;
+   padding: 40px 0;
+
+   @media (max-width: 1600px){
+      padding: 20px 0;
+   }
 
    &__title{
       color: #f1f1f1;
       font-size: 26px;
       font-weight: 600;
       margin: 0px 0px 20px 0px;
+
+      @media (max-width: $md2+px){
+         font-size: 20px;
+      }
    }
 
    &__main{
@@ -31,10 +42,26 @@
       justify-content: space-between;
       gap: 40px;
       height: 100%;
+
+      @media (max-width: $md3+px){
+         flex-direction: column;
+      }
    }
 
    &__left{
-      min-width: 280px;
+      // flex: 0 0 280px;
+      // width: 280px;
+      flex: 0 0 22%;
+      width: 22%;
+
+      @media (max-width: $md2+px){
+         flex: 0 0 220px;
+         width: 220px;
+      }
+      @media (max-width: $md3+px){
+         width: auto;
+         flex: 1 1 auto;
+      }
    }
 
    &__submit{

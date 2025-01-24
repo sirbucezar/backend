@@ -26,6 +26,7 @@ const VideoEditor = ({ videoSrc, setIsStagesSaved, rubric, setRubric }) => {
    const [isPlaying, setIsPlaying] = useState(false);
    const [isPlayingChanged, setIsPlayingChanged] = useState(false);
    const [currentTime, setCurrentTime] = useState(0);
+   const StickyThreshold = 0.5; // Adjust the threshold in seconds to define proximity
 
    const saveStage = () => {
       const newStages = rubric.stages.map((stage, index) => {
@@ -126,13 +127,21 @@ const VideoEditor = ({ videoSrc, setIsStagesSaved, rubric, setRubric }) => {
          const clientX = e.clientX || e.touches[0].clientX;
          const clickX = Math.max(0, Math.min(clientX - rect.left, rect.width));
          const clickPercentage = clickX / rect.width;
-         video.currentTime = clickPercentage * video.duration;
-         if (!isDraggingStart && !isDraggingEnd) {
-            setProgress(clickPercentage * 100);
-            const newCurrentTime = video.currentTime;
+         let newCurrentTime = clickPercentage * video.duration;
 
-            setCurrentTime(newCurrentTime);
+         // Apply snapping logic during scrubbing
+         const startTime = startFrame / frameRate;
+         const endTime = endFrame / frameRate;
+
+         if (Math.abs(newCurrentTime - startTime) < StickyThreshold) {
+            newCurrentTime = startTime;
+         } else if (Math.abs(newCurrentTime - endTime) < StickyThreshold) {
+            newCurrentTime = endTime;
          }
+
+         video.currentTime = newCurrentTime;
+         setCurrentTime(newCurrentTime);
+         setProgress((newCurrentTime / video.duration) * 100);
       }
    };
 
@@ -432,43 +441,45 @@ const VideoEditor = ({ videoSrc, setIsStagesSaved, rubric, setRubric }) => {
                   </button>
                </div>
             </div>
-            <VideoTicks duration={duration} startScrubbing={startScrubbing} />
-            <div ref={trackRef} className={s.videoEditor__track}>
-               {/* Range Highlight */}
-               <div
-                  className={s.videoEditor__rangeHighlight}
-                  style={{
-                     left: `${calculatePositionPercentage(startFrame)}%`,
-                     width: `${calculatePositionPercentage(endFrame - startFrame)}%`,
-                  }}
-                  // onMouseDown={(e) => handleDragStart(e, 'range')}
-                  // onTouchStart={(e) => handleDragStart(e, 'range')}
-               ></div>
-               <div>
-                  {/* Start Handle */}
+            <div className={s.videoEditor__bottom}>
+               <VideoTicks duration={duration} startScrubbing={startScrubbing} />
+               <div ref={trackRef} className={s.videoEditor__track}>
+                  {/* Range Highlight */}
                   <div
-                     className={s.videoEditor__rangeHandle}
-                     style={{ left: `${calculatePositionPercentage(startFrame)}%` }}
-                     onMouseDown={(e) => handleDragStart(e, 'start')}
-                     onTouchStart={(e) => handleDragStart(e, 'start')}>
-                     <div className={s.videoEditor__handleSmall}></div>
+                     className={s.videoEditor__rangeHighlight}
+                     style={{
+                        left: `${calculatePositionPercentage(startFrame)}%`,
+                        width: `${calculatePositionPercentage(endFrame - startFrame)}%`,
+                     }}
+                     // onMouseDown={(e) => handleDragStart(e, 'range')}
+                     // onTouchStart={(e) => handleDragStart(e, 'range')}
+                  ></div>
+                  <div>
+                     {/* Start Handle */}
+                     <div
+                        className={s.videoEditor__rangeHandle}
+                        style={{ left: `${calculatePositionPercentage(startFrame)}%` }}
+                        onMouseDown={(e) => handleDragStart(e, 'start')}
+                        onTouchStart={(e) => handleDragStart(e, 'start')}>
+                        <div className={s.videoEditor__handleSmall}></div>
+                     </div>
+
+                     {/* End Handle */}
+                     <div
+                        className={s.videoEditor__rangeHandle}
+                        style={{ left: `${calculatePositionPercentage(endFrame)}%` }}
+                        onMouseDown={(e) => handleDragStart(e, 'end')}
+                        onTouchStart={(e) => handleDragStart(e, 'end')}>
+                        <div className={s.videoEditor__handleSmall}></div>
+                     </div>
                   </div>
 
-                  {/* End Handle */}
-                  <div
-                     className={s.videoEditor__rangeHandle}
-                     style={{ left: `${calculatePositionPercentage(endFrame)}%` }}
-                     onMouseDown={(e) => handleDragStart(e, 'end')}
-                     onTouchStart={(e) => handleDragStart(e, 'end')}>
-                     <div className={s.videoEditor__handleSmall}></div>
-                  </div>
-               </div>
-
-               {/* Progress */}
-               <div className={s.videoEditor__progress} style={{ left: `${progress}%` }}>
-                  <div className={s.videoEditor__progressBody}>
-                     <div className={s.videoEditor__progressTriangle}></div>
-                     <div className={s.videoEditor__progressLine}></div>
+                  {/* Progress */}
+                  <div className={s.videoEditor__progress} style={{ left: `${progress}%` }}>
+                     <div className={s.videoEditor__progressBody}>
+                        <div className={s.videoEditor__progressTriangle}></div>
+                        <div className={s.videoEditor__progressLine}></div>
+                     </div>
                   </div>
                </div>
             </div>
