@@ -6,8 +6,10 @@ import numpy as np
 import logging
 from datetime import datetime
 from flask import Flask, request, jsonify
+from azure.storage.queue import QueueServiceClient, QueueClient, TextBase64EncodePolicy
+from azure.storage.blob import BlobServiceClient
 
-# Import stage scripts from the scripts package (assumed to exist)
+# Import stage scripts from the scripts package
 from app.scripts.shotput_stage1_script import main as run_stage1
 from app.scripts.shotput_stage2_script import main as run_stage2
 from app.scripts.shotput_stage3_script import main as run_stage3
@@ -21,8 +23,11 @@ app = Flask(__name__)
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Use PORT environment variable if present; default to 80
+# Environment Variables
 PORT = int(os.environ.get("WEBSITES_PORT", os.environ.get("PORT", 80)))
+AZURE_STORAGE_CONNECTION_STRING = os.environ.get("AZURE_STORAGE_CONNECTION_STRING")
+QUEUE_NAME = "videoprocess-augmented"
+BLOB_CONTAINER_NAME = "cropped-videos"
 
 ### Utility Functions ###
 
@@ -45,10 +50,7 @@ def download_video(url: str) -> str:
         raise
 
 def cut_video_opencv(full_video_path: str, start_frame: int, end_frame: int) -> str:
-    """
-    Cut a subclip from the full video using OpenCV based on frame numbers.
-    Returns the path to the temporary subclip file.
-    """
+    """Cut a subclip from the full video using OpenCV based on frame numbers."""
     cap = cv2.VideoCapture(full_video_path)
     if not cap.isOpened():
         raise Exception(f"Could not open video file: {full_video_path}")
@@ -64,10 +66,8 @@ def cut_video_opencv(full_video_path: str, start_frame: int, end_frame: int) -> 
     fourcc = cv2.VideoWriter_fourcc(*'mp4v')
     out = cv2.VideoWriter(subclip_path, fourcc, fps, (width, height))
 
-    # Set the starting frame position
     cap.set(cv2.CAP_PROP_POS_FRAMES, start_frame)
 
-    # Write frames from start_frame to end_frame - 1
     for frame_num in range(start_frame, end_frame):
         ret, frame = cap.read()
         if not ret:
@@ -78,60 +78,63 @@ def cut_video_opencv(full_video_path: str, start_frame: int, end_frame: int) -> 
     cap.release()
     out.release()
 
-    # Log file size for diagnostics
-    if os.path.exists(subclip_path):
-        file_size = os.path.getsize(subclip_path)
-        logger.info(f"Subclip saved to {subclip_path} (size: {file_size} bytes)")
-    else:
-        logger.error(f"Subclip file {subclip_path} does not exist after writing.")
-
-    # Optional: Verify that the subclip can be opened by OpenCV
-    subclip_cap = cv2.VideoCapture(subclip_path)
-    if not subclip_cap.isOpened():
-        subclip_cap.release()
-        raise Exception("Could not open subclip video file")
-    subclip_cap.release()
-
+    logger.info(f"Subclip saved to {subclip_path}")
     return subclip_path
 
+def upload_to_blob(local_video_path, processing_id, stage_name):
+    """Uploads a processed video clip to Azure Blob Storage."""
+    try:
+        blob_service_client = BlobServiceClient.from_connection_string(AZURE_STORAGE_CONNECTION_STRING)
+        container_client = blob_service_client.get_container_client(BLOB_CONTAINER_NAME)
+
+        blob_name = f"{processing_id}/{stage_name}.mp4"
+        blob_client = container_client.get_blob_client(blob_name)
+
+        with open(local_video_path, "rb") as data:
+            blob_client.upload_blob(data, overwrite=True)
+
+        logger.info(f"Uploaded cropped video: {blob_name}")
+        return blob_client.url
+    except Exception as e:
+        logger.error(f"Error uploading cropped video: {str(e)}")
+        return None
+
+def send_to_queue(message_data):
+    """Sends a message to Azure Queue Storage."""
+    try:
+        queue_client = QueueClient.from_connection_string(AZURE_STORAGE_CONNECTION_STRING, QUEUE_NAME, message_encode_policy=TextBase64EncodePolicy())
+        queue_client.send_message(message_data)
+        logger.info("Message successfully added to the queue.")
+    except Exception as e:
+        logger.error(f"Error sending message to queue: {str(e)}")
+
 def analyze_stage(video_path: str, stage: dict) -> dict:
-    """Analyze a single stage using the appropriate stage script.
-    
-    This version uses the provided start_time and end_time as frame numbers.
-    """
+    """Analyze a single stage using the appropriate script."""
     stage_name = stage.get("name", "").lower()
-    # Use start_time and end_time directly as frame numbers
     start_frame = int(stage.get("start_time", 0))
     end_frame = int(stage.get("end_time", 0))
 
-    # Open the video to retrieve fps (for writing the subclip correctly)
-    cap = cv2.VideoCapture(video_path)
-    if not cap.isOpened():
-        raise Exception(f"Could not open video file: {video_path}")
-    fps = cap.get(cv2.CAP_PROP_FPS)
-    cap.release()
+    logger.info(f"Analyzing stage {stage_name} from frame {start_frame} to {end_frame}")
 
-    logger.info(f"Analyzing stage {stage_name} from frame {start_frame} to {end_frame} (fps: {fps}).")
-    
     subclip_path = cut_video_opencv(video_path, start_frame, end_frame)
+    video_url = upload_to_blob(subclip_path, stage.get("processing_id", "unknown"), stage_name)
 
     try:
         if stage_name == "stage1":
-            return run_stage1(subclip_path)
+            return {**run_stage1(subclip_path), "video_url": video_url}
         elif stage_name == "stage2":
-            return run_stage2(subclip_path)
+            return {**run_stage2(subclip_path), "video_url": video_url}
         elif stage_name == "stage3":
-            return run_stage3(subclip_path)
+            return {**run_stage3(subclip_path), "video_url": video_url}
         elif stage_name == "stage4":
-            return run_stage4(subclip_path)
+            return {**run_stage4(subclip_path), "video_url": video_url}
         elif stage_name == "stage5":
-            return run_stage5(subclip_path)
+            return {**run_stage5(subclip_path), "video_url": video_url}
         else:
             logger.error(f"Unknown stage: {stage_name}")
-            return {"error": f"Unknown stage: {stage_name}"}
+            return {"error": f"Unknown stage: {stage_name}", "video_url": None}
     finally:
-        if os.path.exists(subclip_path):
-            os.remove(subclip_path)
+        os.remove(subclip_path)
 
 ### Endpoints ###
 
@@ -149,8 +152,7 @@ def analyze_video():
         processing_id = data.get("processing_id", "unknown")
 
         if not video_url or not stages:
-            logger.error("Missing required fields in request.")
-            return jsonify({"error": "Missing required fields (video_url, stages)", "status": "failed"}), 400
+            return jsonify({"error": "Missing required fields"}), 400
 
         local_video_path = download_video(video_url)
         result = {
@@ -160,50 +162,31 @@ def analyze_video():
             "metrics": {"overall_score": 0.0, "confidence": 0.0}
         }
 
-        total_score = 0.0
-        total_confidence = 0.0
-        processed_stages = 0
-
         for stage in stages:
             stage_name = stage.get("name", "")
+            stage["processing_id"] = processing_id
             stage_result = analyze_stage(local_video_path, stage)
             result["stageAnalysis"][stage_name] = stage_result
 
-            # Attempt to get a score from either 'predicted_score' or 'score'
-            score = stage_result.get("classified_score") or stage_result.get("score")
-            confidence = stage_result.get("confidence", 0.0)
-
-            if score is not None:
-                total_score += float(score)
-                total_confidence += float(confidence)
-                processed_stages += 1
-
-        # Instead of averaging, we want the total sum of the stages' scores.
-        result["metrics"]["overall_score"] = total_score
-        # Optionally you can sum the confidence values as well (or decide on another aggregation)
-        result["metrics"]["confidence"] = total_confidence
+        send_to_queue(result)
 
         logger.info(f"Analysis completed: {result}")
         return jsonify(result)
     except Exception as e:
-        logger.error(f"Error in /analyze endpoint: {str(e)}")
-        return jsonify({"error": str(e), "status": "failed"}), 500
+        logger.error(f"Error in /analyze: {str(e)}")
+        return jsonify({"error": str(e)}), 500
     finally:
-        try:
-            if 'local_video_path' in locals() and os.path.exists(local_video_path):
-                os.remove(local_video_path)
-        except Exception as cleanup_error:
-            logger.error(f"Cleanup error: {str(cleanup_error)}")
+        if os.path.exists(local_video_path):
+            os.remove(local_video_path)
 
 @app.route("/health", methods=["GET"])
 def health_check():
-    """Health-check endpoint for container and app diagnostics."""
+    """Health-check endpoint for container diagnostics."""
     return jsonify({
         "status": "healthy",
         "timestamp": datetime.utcnow().isoformat(),
         "version": os.environ.get("VERSION", "dev")
     }), 200
 
-# Only run if executed directly (useful for local debugging)
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=PORT, debug=False)
