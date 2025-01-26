@@ -12,6 +12,16 @@ const VideoStages = ({
    return (
       <div className={s.videoStages}>
          <div className={s.videoStages__body}>
+            {/* {isVideoCut ? (
+               <div className={s.videoStages__time}>
+                  <div className={s.videoStages__cut}>
+                     From <span>{fromTime}</span>
+                  </div>
+                  <div className={s.videoStages__cut}>
+                     To <span>{toTime}</span>
+                  </div>
+               </div>
+            ) : ( */}
             <ul className={s.videoStages__list}>
                {rubric.stages.map((stage, index) => (
                   <div

@@ -88,4 +88,22 @@
          }
       }
    }
+
+   &__time{
+      display: flex;
+      align-items: center;
+      border: 2px solid rgba(238, 238, 238, 0.15);
+      gap: 12px;
+      border-radius: 30px;
+      padding: 16px 26px;
+
+   }
+
+   &__cut{
+      color: #f1f1f1;
+      font-weight: 500;
+      span{
+         font-weight: 600;
+      }
+   }
 }

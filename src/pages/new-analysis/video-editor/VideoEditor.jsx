@@ -5,20 +5,31 @@ import VideoInfo from './video-info/VideoInfo';
 import VideoStages from './video-stages/VideoStages';
 import { toast } from 'sonner';
 
-const VideoEditor = ({ videoSrc, setIsStagesSaved, rubric, setRubric }) => {
+const VideoEditor = ({
+   isVideoCut,
+   videoSrc,
+   setIsStagesSaved,
+   rubric,
+   setRubric,
+   fromTime,
+   setFromTime,
+   toTime,
+   setToTime,
+   startFrame,
+   setStartFrame,
+   endFrame,
+   setEndFrame,
+   isDurationValid,
+   setIsDurationValid,
+}) => {
    const [currentStage, setCurrentStage] = useState(0);
 
    const videoRef = useRef(null);
    const trackRef = useRef(null);
    const [progress, setProgress] = useState(0);
    const [duration, setDuration] = useState(0);
-   const [startFrame, setStartFrame] = useState(0); // Start position in frames
-   const [endFrame, setEndFrame] = useState(0); // End position in frames
    const [isDraggingStart, setIsDraggingStart] = useState(false);
    const [isDraggingEnd, setIsDraggingEnd] = useState(false);
-   const [isDraggingRange, setIsDraggingRange] = useState(false);
-   const [dragStartOffset, setDragStartOffset] = useState(0);
-   const [frameRate, setFrameRate] = useState(30);
    const [isScrubbing, setIsScrubbing] = useState(false);
    const minFrameSelect = 3;
    const [videoLength, setVideoLength] = useState(null);
@@ -26,6 +37,7 @@ const VideoEditor = ({ videoSrc, setIsStagesSaved, rubric, setRubric }) => {
    const [isPlaying, setIsPlaying] = useState(false);
    const [isPlayingChanged, setIsPlayingChanged] = useState(false);
    const [currentTime, setCurrentTime] = useState(0);
+   const [frameRate, setFrameRate] = useState(30);
    const StickyThreshold = 0.2; // Adjust the threshold in seconds to define proximity
 
    // Define zoom scale levels
@@ -43,6 +55,8 @@ const VideoEditor = ({ videoSrc, setIsStagesSaved, rubric, setRubric }) => {
       });
       const newRubric = { ...rubric, stages: newStages };
       toast.success(`Stage ${currentStage + 1} was saved!`);
+
+      console.log(newStages);
 
       let rubricSaved = 0;
       let nextStage = NaN;
@@ -183,6 +197,8 @@ const VideoEditor = ({ videoSrc, setIsStagesSaved, rubric, setRubric }) => {
 
          const newVideoLength = Math.floor(video.duration * frameRate);
          setVideoLength(newVideoLength);
+
+         setStartFrame(0); // Set end position as total frames
          setEndFrame(newVideoLength); // Set end position as total frames
       };
 
@@ -205,6 +221,19 @@ const VideoEditor = ({ videoSrc, setIsStagesSaved, rubric, setRubric }) => {
             if (!isDraggingStart && !isDraggingEnd) {
                // console.log(percentage, progress);
                // setProgress(percentage);
+            }
+
+            if (isVideoCut) {
+               const startMinutes = Math.floor(startFrame / frameRate / 60);
+               const startSeconds = Math.floor((startFrame / frameRate) % 60);
+               setFromTime(`${startMinutes}:${startSeconds.toString().padStart(2, '0')}`);
+
+               const endMinutes = Math.floor(endFrame / frameRate / 60);
+               const endSeconds = Math.floor((endFrame / frameRate) % 60);
+               setToTime(`${endMinutes}:${endSeconds.toString().padStart(2, '0')}`);
+
+               const selectedDuration = (endFrame - startFrame) / frameRate;
+               setIsDurationValid(selectedDuration <= 30);
             }
          }
       };
@@ -479,14 +508,16 @@ const VideoEditor = ({ videoSrc, setIsStagesSaved, rubric, setRubric }) => {
 
    return (
       <div className={s.videoEditor}>
-         <VideoStages
-            rubric={rubric}
-            setRubric={setRubric}
-            currentStage={currentStage}
-            setCurrentStage={setCurrentStage}
-            saveStage={saveStage}
-            handleStageChange={handleStageChange}
-         />
+         {!isVideoCut && (
+            <VideoStages
+               rubric={rubric}
+               setRubric={setRubric}
+               currentStage={currentStage}
+               setCurrentStage={setCurrentStage}
+               saveStage={saveStage}
+               handleStageChange={handleStageChange}
+            />
+         )}
          <div className={s.videoEditor__main}>
             <div className={s.videoEditor__body}>
                <VideoInfo />

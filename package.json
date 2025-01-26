@@ -10,6 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@ffmpeg/ffmpeg": "0.11.6",
     "@gsap/react": "^2.1.2",
     "@radix-ui/react-slot": "^1.1.1",
     "@react-three/drei": "^9.121.3",
