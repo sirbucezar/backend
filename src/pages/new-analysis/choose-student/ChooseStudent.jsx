@@ -2,17 +2,8 @@ import React, { useEffect, useRef, useState } from 'react';
 import s from './styles.module.scss';
 import { toast } from 'sonner';
 
-const ChooseStudent = ({ setSelectedStudent }) => {
-   const [students, setStudents] = useState([
-      { id: 1, firstName: 'Mykyta', lastName: 'Tsykunov', isSelected: false },
-      { id: 2, firstName: 'Cezar', lastName: 'Sîrbu', isSelected: false },
-      { id: 3, firstName: 'Danylo', lastName: 'Bordunov', isSelected: false },
-      { id: 4, firstName: 'Alex', lastName: 'Johnson', isSelected: false },
-      { id: 5, firstName: 'Maria', lastName: 'Smith', isSelected: false },
-      { id: 6, firstName: 'Elena', lastName: 'Brown', isSelected: false },
-   ]);
+const ChooseStudent = ({ students, setStudents, setSelectedStudent, title, setTitle }) => {
    const [searchTerm, setSearchTerm] = useState('');
-   const [title, setTitle] = useState('Choose a student');
    const [isDropdownOpen, setIsDropdownOpen] = useState(false);
    const [isNewStudentDropdownOpen, setNewStudentIsDropdownOpen] = useState(false);
    const [firstName, setFirstName] = useState('');

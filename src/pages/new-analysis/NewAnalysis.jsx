@@ -9,11 +9,21 @@ import { useNavigate } from 'react-router';
 import Sidebar from './sidebar/Sidebar';
 import VideoCut from './video-cut/VideoCut ';
 import { createFFmpeg, fetchFile } from '@ffmpeg/ffmpeg';
+import ExampleVideo from './example-video/ExampleVideo';
 
-const NewAnalysis = ({ showVideoEditor, setShowVideoEditor }) => {
+const NewAnalysis = ({ rubrics, showVideoEditor, setShowVideoEditor }) => {
    const [ffmpeg, setFfmpeg] = useState(createFFmpeg({ log: false }));
    // Student, Sport, and local video states
    const [selectedStudent, setSelectedStudent] = useState('');
+   const [students, setStudents] = useState([
+      { id: 1, firstName: 'Mykyta', lastName: 'Tsykunov', isSelected: false },
+      { id: 2, firstName: 'Cezar', lastName: 'Sîrbu', isSelected: false },
+      { id: 3, firstName: 'Danylo', lastName: 'Bordunov', isSelected: false },
+      { id: 4, firstName: 'Alex', lastName: 'Johnson', isSelected: false },
+      { id: 5, firstName: 'Maria', lastName: 'Smith', isSelected: false },
+      { id: 6, firstName: 'Elena', lastName: 'Brown', isSelected: false },
+   ]);
+   const [title, setTitle] = useState('Choose a student');
    const [currentRubric, setCurrentRubric] = useState(null);
    const [videoSrc, setVideoSrc] = useState('');
    const [fileName, setFileName] = useState(null);
@@ -343,40 +353,15 @@ const NewAnalysis = ({ showVideoEditor, setShowVideoEditor }) => {
 
    return (
       <div className={s.newAnalysis}>
-         {!showVideoEditor && <Sidebar />}
+         {!showVideoCut && !showVideoEditor && (
+            <Sidebar
+               currentRubric={currentRubric}
+               setCurrentRubric={setCurrentRubric}
+               rubrics={rubrics}
+            />
+         )}
          <div className={s.newAnalysis__main}>
-            {!showVideoCut && (
-               <div className={s.newAnalysis__left}>
-                  <div className={s.newAnalysis__title} onClick={handleTitleClick}>
-                     Create a new analysis
-                  </div>
-                  {!showVideoEditor ? (
-                     <div>
-                        <ChooseStudent setSelectedStudent={setSelectedStudent} />
-                        <UploadVideo
-                           onUpload={handleVideoUpload}
-                           fileName={fileName}
-                           setFileName={setFileName}
-                        />
-                        <form action="#" onSubmit={handleSubmit}>
-                           <button
-                              type="submit"
-                              className={s.newAnalysis__submit}
-                              disabled={isLoading}>
-                              {isLoading ? 'Uploading...' : 'Submit'}
-                           </button>
-                        </form>
-                     </div>
-                  ) : (
-                     <button
-                        className={s.newAnalysis__submit}
-                        onClick={handleAnalyze}
-                        disabled={isLoading}>
-                        {isLoading ? 'Processing...' : 'Analyze'}
-                     </button>
-                  )}
-               </div>
-            )}
+            {!showVideoCut && !showVideoEditor && <div className={s.newAnalysis__left}></div>}
             {showVideoEditor ? (
                <VideoEditor
                   videoSrc={videoSrc}
@@ -407,7 +392,37 @@ const NewAnalysis = ({ showVideoEditor, setShowVideoEditor }) => {
                   setIsDurationValid={setIsDurationValid}
                />
             ) : (
-               <Rubrics currentRubric={currentRubric} setCurrentRubric={setCurrentRubric} />
+               <div className={s.newAnalysis__content}>
+                  <div className={s.newAnalysis__top}>
+                     <div className={s.newAnalysis__title} onClick={handleTitleClick}>
+                        Create a new analysis
+                     </div>
+
+                     <ChooseStudent
+                        students={students}
+                        setStudents={setStudents}
+                        setSelectedStudent={setSelectedStudent}
+                        title={title}
+                        setTitle={setTitle}
+                     />
+                  </div>
+                  <div className={s.newAnalysis__submitWrap}>
+                     <UploadVideo
+                        onUpload={handleVideoUpload}
+                        fileName={fileName}
+                        setFileName={setFileName}
+                     />
+                     <form action="#" onSubmit={handleSubmit}>
+                        <button
+                           type="submit"
+                           className={s.newAnalysis__submit}
+                           disabled={isLoading}>
+                           {isLoading ? 'Uploading...' : 'Submit'}
+                        </button>
+                     </form>
+                  </div>
+                  <ExampleVideo />
+               </div>
             )}
             {showVideoCut && (
                <div className={s.newAnalysis__right}>
@@ -428,6 +443,18 @@ const NewAnalysis = ({ showVideoEditor, setShowVideoEditor }) => {
                      onClick={handleSaveVideo}
                      disabled={!isDurationValid}>
                      Save video
+                  </button>
+               </div>
+            )}
+            {showVideoEditor && (
+               <div className={s.newAnalysis__right}>
+                  <div className={s.newAnalysis__cutTitle}>Analyze video</div>
+                  <p className={s.newAnalysis__descr}>Complete all stages to get feedback</p>
+                  <button
+                     className={s.newAnalysis__cutBtn}
+                     onClick={handleAnalyze}
+                     disabled={isLoading}>
+                     {isLoading ? 'Processing...' : 'Analyze'}
                   </button>
                </div>
             )}

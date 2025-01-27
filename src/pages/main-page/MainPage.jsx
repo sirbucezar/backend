@@ -117,22 +117,22 @@ const MainPage = () => {
          <Toaster richColors position="bottom-right" className="toaster" />
          <div className={s.mainPage}>
             <div className={`${s.mainPage__container} _container`}>
-               {!showVideoEditor && <TopBar />}
                <Routes>
                   <Route
                      path="/"
                      element={
-                        <NewAnalysis
-                           showVideoEditor={showVideoEditor}
-                           setShowVideoEditor={setShowVideoEditor}
-                        />
+                        <>
+                           {!showVideoEditor && <TopBar />}
+                           <NewAnalysis
+                              showVideoEditor={showVideoEditor}
+                              setShowVideoEditor={setShowVideoEditor}
+                              rubrics={rubrics}
+                           />
+                        </>
                      }
                   />
                   <Route path="/search" element={<Search />} />
-                  <Route
-                     path="/feedback/:userId/:rubricId"
-                     element={<Feedback rubrics={rubrics} />}
-                  />
+                  <Route path="/feedback/" element={<Feedback rubrics={rubrics} />} />
                </Routes>
             </div>
          </div>

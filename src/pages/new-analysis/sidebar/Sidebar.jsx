@@ -10,10 +10,9 @@ import relayRace from '/icons/relay race 2.0.svg';
 import shotPot from '/icons/shot pot 2.0.svg';
 import sprint from '/icons/sprint.svg';
 import startTecchnique from '/icons/start tecchnique.svg';
+import { toast } from 'sonner';
 
-const Sidebar = () => {
-   const sidebarRef = useRef(null);
-   const iconRefs = useRef([]);
+const Sidebar = ({ rubrics, currentRubric, setCurrentRubric }) => {
    const iconsSvg = [
       startTecchnique,
       sprint,
@@ -26,43 +25,57 @@ const Sidebar = () => {
       relayRace,
    ];
 
+   const dockRef = useRef(null);
+   const iconRefs = useRef([]);
+
    useEffect(() => {
       const icons = iconRefs.current;
-      const dock = sidebarRef.current;
-
-      const min = 48; // Base size + margin
-      const max = 120;
+      const dock = dockRef.current;
+      const min = 60 + 16; // width + margin
+      const max = 170;
       const bound = min * Math.PI;
+
+      gsap.set(icons, {
+         transformOrigin: '0% -50%',
+         height: 40,
+      });
+
+      gsap.set(dock, {
+         position: 'relative',
+      });
 
       const updateIcons = (pointer) => {
          icons.forEach((icon, i) => {
             let distance = i * min + min / 2 - pointer;
+            let y = 0;
             let scale = 1;
 
             if (-bound < distance && distance < bound) {
                let rad = (distance / min) * 0.5;
                scale = 1 + (max / min - 1) * Math.cos(rad);
+               y = 2 * (max - min) * Math.sin(rad);
+            } else {
+               y = (-bound < distance ? 2 : -2) * (max - min);
             }
 
             gsap.to(icon, {
-               ease: 'power4.out',
-               duration: 0.5,
-               width: `${40 * scale}px`,
+               duration: 0.3,
+               y: y,
+               scale: scale,
             });
          });
       };
 
       const handleMouseMove = (event) => {
-         let offset = dock.getBoundingClientRect().left + icons[0].offsetLeft;
-
-         updateIcons(event.clientX - offset);
+         let offset = dock.getBoundingClientRect().top + icons[0].offsetTop;
+         updateIcons(event.clientY - offset);
       };
 
       const handleMouseLeave = () => {
          gsap.to(icons, {
-            ease: 'power4.out',
-            duration: 0.5,
-            width: '40px',
+            duration: 0.3,
+            scale: 1,
+            y: 0,
          });
       };
 
@@ -75,18 +88,29 @@ const Sidebar = () => {
       };
    }, []);
 
+   const handleRubricClick = (rubric) => {
+      setCurrentRubric(rubric);
+      toast.success(`Rubric ${rubric.name} is chosen`);
+   };
+
    return (
       <div className={s.sidebar}>
          <div className={s.sidebar__wrapper}>
-            <ul className={s.sidebar__toolbar} ref={sidebarRef}>
-               {Array.from({ length: 9 }).map((_, index) => (
+            <ul className={s.sidebar__toolbar} ref={dockRef}>
+               {iconsSvg.map((icon, index) => (
                   <li
                      key={index}
-                     className={s.sidebar__item}
+                     onClick={() =>
+                        handleRubricClick({ id: rubrics[index].id, name: rubrics[index].name })
+                     }
+                     className={`${s.sidebar__item} ${
+                        currentRubric?.id === rubrics[index].id ? s.active : ''
+                     }`}
                      ref={(el) => (iconRefs.current[index] = el)}>
                      <div className={s.sidebar__icon}>
-                        <img src={iconsSvg[index]} />
+                        <img src={icon} alt={`icon-${index}`} />
                      </div>
+                     <div className={s.sidebar__title}>{rubrics[index].name}</div>
                   </li>
                ))}
             </ul>

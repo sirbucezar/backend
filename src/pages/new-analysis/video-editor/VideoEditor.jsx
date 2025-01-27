@@ -39,6 +39,7 @@ const VideoEditor = ({
    const [currentTime, setCurrentTime] = useState(0);
    const [frameRate, setFrameRate] = useState(30);
    const StickyThreshold = 0.2; // Adjust the threshold in seconds to define proximity
+   const StickyThresholdPercentage = 1;
 
    // Define zoom scale levels
    const zoomScales = [1, 1.5, 2]; // Corresponding to zoom levels 0, 1, 2
@@ -167,17 +168,21 @@ const VideoEditor = ({
          const clickPercentage = clickX / rect.width;
          let newCurrentTime = clickPercentage * video.duration;
 
+         // Calculate threshold dynamically based on percentage of video duration
+         const stickyThreshold = (StickyThresholdPercentage / 100) * video.duration;
+
          // Apply snapping logic during scrubbing
          const startTime = startFrame / frameRate;
          const endTime = endFrame / frameRate;
 
-         if (Math.abs(newCurrentTime - startTime) < StickyThreshold) {
+         if (Math.abs(newCurrentTime - startTime) < stickyThreshold) {
             newCurrentTime = startTime;
-         } else if (Math.abs(newCurrentTime - endTime) < StickyThreshold) {
+         } else if (Math.abs(newCurrentTime - endTime) < stickyThreshold) {
             newCurrentTime = endTime;
          }
 
          video.currentTime = newCurrentTime;
+
          if (!isDraggingStart && !isDraggingEnd) {
             setCurrentTime(newCurrentTime);
             setProgress((newCurrentTime / video.duration) * 100);
