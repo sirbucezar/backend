@@ -50,10 +50,10 @@
    .stages {
       &__itemExpanded {
         position: fixed; 
-        top: 14%; 
-        left: 14%;
+        top: 0; 
+        left: 0;
         z-index: 10000;
-        width: 80%; 
+        width: 1000px; 
         max-width: 1000px;
         min-height: 500px;
         display: flex;

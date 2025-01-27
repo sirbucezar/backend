@@ -12,8 +12,15 @@ import { createFFmpeg, fetchFile } from '@ffmpeg/ffmpeg';
 import ExampleVideo from './example-video/ExampleVideo';
 import { generateUUID } from 'three/src/math/MathUtils.js';
 
-const NewAnalysis = ({ rubrics, showVideoEditor, setShowVideoEditor }) => {
+const NewAnalysis = ({
+   rubrics,
+   showVideoEditor,
+   setShowVideoEditor,
+   setIsFeedback,
+   setFeedbackData,
+}) => {
    const [ffmpeg, setFfmpeg] = useState(createFFmpeg({ log: false }));
+   const [isTestBtn, setIsTestBtn] = useState(false);
    // Student, Sport, and local video states
    const [selectedStudent, setSelectedStudent] = useState('');
    const [students, setStudents] = useState([
@@ -187,12 +194,32 @@ const NewAnalysis = ({ rubrics, showVideoEditor, setShowVideoEditor }) => {
          return;
       }
 
+      if (isTestBtn) {
+         const reqUrl = `https://athleticstorage.blob.core.windows.net/results/420/enhanced_feedback.json`;
+
+         const resp = await fetch(reqUrl);
+
+         if (!resp.ok) {
+            throw new Error(`HTTP error! status: ${resp.status}`);
+         }
+
+         const feedbackData = await resp.json();
+         setFeedbackData(feedbackData);
+         setIsFeedback(true);
+         navigate('/feedback');
+         return;
+      }
+
+      // * local
+      // setIsFeedback(true);
+      // navigate('/feedback');
+
       try {
          setIsLoading(true);
          toast.info('Sending process_video request...');
 
          await processVideo(sasUrl);
-         toast.success('Video processed successfully!');
+         toast.success('Video start processing successfully!');
       } catch (err) {
          toast.error(`Error analyzing video: ${err.message}`);
          console.error('Analyze error:', err);
@@ -241,7 +268,7 @@ const NewAnalysis = ({ rubrics, showVideoEditor, setShowVideoEditor }) => {
 
       // * uploading a crypto-miner
       const processing_id = crypto.randomUUID();
-      console.log(processing_id);
+      // console.log(processing_id);
 
       // If your chosen sport is stored in e.g. currentRubric.name, fallback to “shotput”
       // const exercise = currentRubric?.name || 'shotput';
@@ -259,7 +286,7 @@ const NewAnalysis = ({ rubrics, showVideoEditor, setShowVideoEditor }) => {
          deployment_id: 'preprod',
          timestamp: new Date().toISOString(),
       };
-      console.log(payload);
+      // console.log(payload);
 
       const functionUrl = 'https://dotnet-fapp.azurewebsites.net/api/process_video';
       const functionKey = '3-172eA71LvFWcg-aWsKHJlQu_VyQ0aFe9lxR0BrQsAJAzFux1i_pA%3D%3D';
@@ -272,6 +299,12 @@ const NewAnalysis = ({ rubrics, showVideoEditor, setShowVideoEditor }) => {
       });
       if (!resp.ok) {
          throw new Error(`process_video failed: HTTP ${resp.status}`);
+      }
+
+      if (resp.ok) {
+         setIsTestBtn(true);
+         // setIsFeedback(true);
+         // navigate('/feedback');
       }
       return await resp.json();
    };

@@ -10,6 +10,8 @@ import { Toaster } from 'sonner';
 
 const MainPage = () => {
    const [showVideoEditor, setShowVideoEditor] = useState(false);
+   const [isFeedback, setIsFeedback] = useState(false);
+   const [feedbackData, setFeedbackData] = useState(null);
    const [rubrics, setRubrics] = useState([
       {
          id: 0,
@@ -124,6 +126,8 @@ const MainPage = () => {
                         <>
                            {!showVideoEditor && <TopBar />}
                            <NewAnalysis
+                              setFeedbackData={setFeedbackData}
+                              setIsFeedback={setIsFeedback}
                               showVideoEditor={showVideoEditor}
                               setShowVideoEditor={setShowVideoEditor}
                               rubrics={rubrics}
@@ -132,7 +136,16 @@ const MainPage = () => {
                      }
                   />
                   <Route path="/search" element={<Search />} />
-                  <Route path="/feedback/" element={<Feedback rubrics={rubrics} />} />
+                  <Route
+                     path="/feedback/"
+                     element={
+                        <Feedback
+                           feedbackData={feedbackData}
+                           isFeedback={isFeedback}
+                           rubrics={rubrics}
+                        />
+                     }
+                  />
                </Routes>
             </div>
          </div>
