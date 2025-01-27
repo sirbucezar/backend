@@ -244,7 +244,8 @@ const NewAnalysis = ({ rubrics, showVideoEditor, setShowVideoEditor }) => {
       console.log(processing_id);
 
       // If your chosen sport is stored in e.g. currentRubric.name, fallback to “shotput”
-      const exercise = currentRubric?.name || 'shotput';
+      // const exercise = currentRubric?.name || 'shotput';
+      const exercise = 'shotput';
 
       // Format the user name: “Doe_John”
       const userName = formatStudentName(selectedStudent);
