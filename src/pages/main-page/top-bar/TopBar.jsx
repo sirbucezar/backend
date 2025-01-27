@@ -17,11 +17,11 @@ const TopBar = () => {
             </li>
             <li className={s.topBar__item}>
                <NavLink
-                  to="/history"
+                  to="/search"
                   className={({ isActive }) =>
                      isActive ? `${s.topBar__link} ${s.topBar__link_active}` : s.topBar__link
                   }>
-                  History
+                  Search
                </NavLink>
             </li>
          </ul>

@@ -13,7 +13,7 @@ import LoginForm from '../../components/login-form/LoginForm';
 const Overview = () => {
    const isSmall = useMediaQuery({ maxWidth: 440 });
    const isMobile = useMediaQuery({ maxWidth: 768 });
-   const isTablet = useMediaQuery({ query: "(min-width: 768px) and (max-width: 1024px)" });
+   const isTablet = useMediaQuery({ query: '(min-width: 768px) and (max-width: 1024px)' });
 
    const animDuration = 4;
    let timeout;
@@ -97,7 +97,7 @@ const Overview = () => {
       <>
          {/* <Leva /> */}
          <div className={s.hero}>
-            {/* <LoginForm isAnimEnded={isAnimEnded} /> */}
+            <LoginForm isAnimEnded={isAnimEnded} />
             <Canvas
                className={s.canvas}
                style={{ height: '100%', width: '100%', overflow: 'hidden' }}>

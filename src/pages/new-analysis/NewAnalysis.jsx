@@ -20,7 +20,7 @@ const NewAnalysis = ({ showVideoEditor, setShowVideoEditor }) => {
    const [rawFile, setRawFile] = useState(null);
    const [showVideoCut, setShowVideoCut] = useState(false);
 
-   const [easterEgg, setEasterEgg] = useState(['', 0]);
+   const [easterEgg, setEasterEgg] = useState(['Howest', 0]);
    let navigate = useNavigate();
 
    // SAS + “Analyze” workflow
@@ -140,8 +140,8 @@ const NewAnalysis = ({ showVideoEditor, setShowVideoEditor }) => {
       }
 
       // * local
-      // setShowVideoEditor(true);
-      // return;
+      setShowVideoEditor(true);
+      return;
 
       // Actually do the upload
       try {

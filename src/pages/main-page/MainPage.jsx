@@ -3,7 +3,7 @@ import { Routes, Route } from 'react-router';
 import TopBar from './top-bar/TopBar.jsx';
 import NewAnalysis from '../new-analysis/NewAnalysis.jsx';
 import Overview from '../overview/Overview.jsx';
-import History from '../history/History.jsx';
+import Search from '../search/Search.jsx';
 import Feedback from '../feedback/Feedback.jsx';
 import s from './styles.module.scss';
 import { Toaster } from 'sonner';
@@ -128,7 +128,7 @@ const MainPage = () => {
                         />
                      }
                   />
-                  <Route path="/history" element={<History />} />
+                  <Route path="/search" element={<Search />} />
                   <Route
                      path="/feedback/:userId/:rubricId"
                      element={<Feedback rubrics={rubrics} />}

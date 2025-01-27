@@ -17,6 +17,17 @@
          height: 100%;
          path{
             stroke: #B0B0B0;
+            transition: all .3s ease-in-out;
+         }
+      }
+
+      @media(any-hover: hover){
+         &:hover{
+            svg{
+               path{
+                  stroke: #eee;
+               }
+            }
          }
       }
    }
@@ -43,7 +54,7 @@
 
    &__body{
       position: relative;
-      padding: 40px 40px;
+      padding: 30px 30px;
       display: flex;
       flex-direction: column;
 
@@ -57,11 +68,11 @@
       font-size: 24px;
       font-weight: 600;
       color: #f1f1f1;
-      margin: 20px 0px 30px 0px;
+      margin: 10px 0px 22px 0px;
 
       @media (max-width: $md1+px){
          font-size: 20px;
-         margin: 10px 0px 20px 0px;
+         margin: 0px 0px 20px 0px;
       }
    }
 
@@ -72,7 +83,7 @@
       justify-content: center;
       display: flex;
       flex-direction: column;
-      gap: 30px;
+      gap: 20px;
       flex: 1 1 auto;
 
       @media (max-width: $md1+px){
@@ -83,7 +94,7 @@
    &__item{
       display: flex;
       align-items: center;
-      gap: 24px;
+      gap: 22px;
 
       @media (max-width: $md1+px){
          gap: 16px;
@@ -98,8 +109,8 @@
 
    &__key{
       color: #f1f1f1;
-      width: 50px;
-      height: 50px;
+      width: 48px;
+      height: 48px;
       border: 3px solid #f1f1f1;
       display: flex;
       justify-content: center;
@@ -136,7 +147,7 @@
    }
 
    &__close{
-      margin: 40px 0px 20px 0px;
+      margin: 34px 0px 10px 0px;
       color: #f1f1f1;
       font-weight: 600;
       display: flex;
@@ -146,6 +157,7 @@
       font-size: 16px;
       gap: 16px;
       cursor: pointer;
+      transition: all .3s ease-in-out;
 
       @media (max-width: $md1+px){
          margin: 30px 0px 15px 0px;
@@ -155,6 +167,19 @@
       svg{
          path{
             stroke: #f1f1f1;
+            transition: all .3s ease-in-out;
+         }
+      }
+
+      @media(any-hover: hover){
+         &:hover{
+            color: #ccc;
+
+            svg{
+               path{
+                  stroke: #ccc;
+               }
+            }
          }
       }
    }

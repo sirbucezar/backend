@@ -9,7 +9,10 @@ const LoginForm = ({ isAnimEnded }) => {
             <div className={s.loginFrom__container}>
                <div className={s.loginFrom__body}>
                   <div className={s.loginFrom__title}>Login</div>
-                  <LoginButton />
+                  <div className={s.loginFrom__buttons}>
+                     <LoginButton type="microsoft" />
+                     <LoginButton type="google" />
+                  </div>
                </div>
             </div>
          </div>
