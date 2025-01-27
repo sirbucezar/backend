@@ -1,16 +1,23 @@
 @use '../../../assets/style/global.scss' as *;
 
 .chooseStudent{
-   @media (min-width: $md2+px){
-      width: 320px;
-      flex: 0 0 320px;
+   // @media (min-width: $md2+px){
+   //    width: 320px;
+   //    flex: 0 0 320px;
+   // }
+   width: 320px;
+   flex: 0 0 320px;
+
+   @media (max-width: $md2+px){
+      width: 280px;
+      flex: 0 0 280px;
    }
-   @media (max-width: $md3+px){
-      max-width: 360px;
-   }
-   @media (max-width: $md4+px){
-      max-width: none;
-   }
+   // @media (max-width: $md3+px){
+   //    max-width: 360px;
+   // }
+   // @media (max-width: $md4+px){
+   //    max-width: none;
+   // }
    &__main{
       display: flex;
       align-items: flex-end;

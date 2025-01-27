@@ -11,5 +11,8 @@ export default defineConfig({
          'Cross-Origin-Opener-Policy': 'same-origin',
          'Cross-Origin-Embedder-Policy': 'require-corp',
       },
+      mimeTypes: {
+         'video/mp4': ['mp4'],
+      },
    },
 });

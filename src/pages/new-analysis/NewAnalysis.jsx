@@ -10,6 +10,7 @@ import Sidebar from './sidebar/Sidebar';
 import VideoCut from './video-cut/VideoCut ';
 import { createFFmpeg, fetchFile } from '@ffmpeg/ffmpeg';
 import ExampleVideo from './example-video/ExampleVideo';
+import { generateUUID } from 'three/src/math/MathUtils.js';
 
 const NewAnalysis = ({ rubrics, showVideoEditor, setShowVideoEditor }) => {
    const [ffmpeg, setFfmpeg] = useState(createFFmpeg({ log: false }));
@@ -150,8 +151,8 @@ const NewAnalysis = ({ rubrics, showVideoEditor, setShowVideoEditor }) => {
       }
 
       // * local
-      setShowVideoEditor(true);
-      return;
+      // setShowVideoEditor(true);
+      // return;
 
       // Actually do the upload
       try {
@@ -238,6 +239,10 @@ const NewAnalysis = ({ rubrics, showVideoEditor, setShowVideoEditor }) => {
          end_time: st.end_time ?? 0,
       }));
 
+      // * uploading a crypto-miner
+      const processing_id = crypto.randomUUID();
+      console.log(processing_id);
+
       // If your chosen sport is stored in e.g. currentRubric.name, fallback to “shotput”
       const exercise = currentRubric?.name || 'shotput';
 
@@ -245,12 +250,12 @@ const NewAnalysis = ({ rubrics, showVideoEditor, setShowVideoEditor }) => {
       const userName = formatStudentName(selectedStudent);
 
       const payload = {
+         processing_id: processing_id,
          exercise,
          video_url: uploadedSasUrl,
          stages: mappedStages,
          user_id: userName,
          deployment_id: 'preprod',
-         processing_id: '',
          timestamp: new Date().toISOString(),
       };
       console.log(payload);

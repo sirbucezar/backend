@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import s from './styles.module.scss';
 import discursThrow from '/icons/discus throw.svg';
@@ -27,17 +27,31 @@ const Sidebar = ({ rubrics, currentRubric, setCurrentRubric }) => {
 
    const dockRef = useRef(null);
    const iconRefs = useRef([]);
+   const [isHeightExceeded, setIsHeightExceeded] = useState(false);
 
    useEffect(() => {
       const icons = iconRefs.current;
       const dock = dockRef.current;
-      const min = 60 + 16; // width + margin
-      const max = 170;
+      const min = 80; // width + margin
+      const max = 120;
       const bound = min * Math.PI;
 
+      // Check if sidebar height exceeds screen height
+      const checkHeight = () => {
+         if (dock.scrollHeight > window.innerHeight || window.innerWidth < 992) {
+            setIsHeightExceeded(true);
+         } else {
+            setIsHeightExceeded(false);
+         }
+      };
+
+      // Initial check and add resize listener
+      checkHeight();
+      window.addEventListener('resize', checkHeight);
+
       gsap.set(icons, {
-         transformOrigin: '0% -50%',
-         height: 40,
+         transformOrigin: '0% -0%',
+         height: 60,
       });
 
       gsap.set(dock, {
@@ -50,12 +64,15 @@ const Sidebar = ({ rubrics, currentRubric, setCurrentRubric }) => {
             let y = 0;
             let scale = 1;
 
-            if (-bound < distance && distance < bound) {
+            if (Math.abs(distance) < bound) {
                let rad = (distance / min) * 0.5;
                scale = 1 + (max / min - 1) * Math.cos(rad);
-               y = 2 * (max - min) * Math.sin(rad);
+               y = (max - min) * Math.sin(rad);
+               icon.classList.add(s.show); // Add active class to hovered item
+               icon.classList.remove(s.inactive);
             } else {
-               y = (-bound < distance ? 2 : -2) * (max - min);
+               icon.classList.add(s.inactive); // Add inactive class to other items
+               icon.classList.remove(s.show);
             }
 
             gsap.to(icon, {
@@ -67,26 +84,39 @@ const Sidebar = ({ rubrics, currentRubric, setCurrentRubric }) => {
       };
 
       const handleMouseMove = (event) => {
-         let offset = dock.getBoundingClientRect().top + icons[0].offsetTop;
-         updateIcons(event.clientY - offset);
+         if (!isHeightExceeded) {
+            const offset = dock.getBoundingClientRect().top;
+            const mouseY = event.clientY - offset;
+            updateIcons(mouseY);
+         }
       };
 
       const handleMouseLeave = () => {
-         gsap.to(icons, {
-            duration: 0.3,
-            scale: 1,
-            y: 0,
-         });
+         if (!isHeightExceeded) {
+            gsap.to(icons, {
+               duration: 0.3,
+               scale: 1,
+               y: 0,
+            });
+
+            // Remove all active and inactive classes
+            icons.forEach((icon) => {
+               icon.classList.remove(s.show, s.inactive);
+            });
+         }
       };
 
       dock.addEventListener('mousemove', handleMouseMove);
       dock.addEventListener('mouseleave', handleMouseLeave);
 
       return () => {
-         dock.removeEventListener('mousemove', handleMouseMove);
-         dock.removeEventListener('mouseleave', handleMouseLeave);
+         if (!isHeightExceeded) {
+            dock.removeEventListener('mousemove', handleMouseMove);
+            dock.removeEventListener('mouseleave', handleMouseLeave);
+         }
+         window.removeEventListener('resize', checkHeight);
       };
-   }, []);
+   }, [isHeightExceeded]);
 
    const handleRubricClick = (rubric) => {
       setCurrentRubric(rubric);
@@ -95,7 +125,7 @@ const Sidebar = ({ rubrics, currentRubric, setCurrentRubric }) => {
 
    return (
       <div className={s.sidebar}>
-         <div className={s.sidebar__wrapper}>
+         <div className={`${s.sidebar__wrapper} ${isHeightExceeded ? s.scroll : ''}`}>
             <ul className={s.sidebar__toolbar} ref={dockRef}>
                {iconsSvg.map((icon, index) => (
                   <li
@@ -104,8 +134,10 @@ const Sidebar = ({ rubrics, currentRubric, setCurrentRubric }) => {
                         handleRubricClick({ id: rubrics[index].id, name: rubrics[index].name })
                      }
                      className={`${s.sidebar__item} ${
-                        currentRubric?.id === rubrics[index].id ? s.active : ''
-                     }`}
+                        iconRefs.current[index]?.classList.contains(s.show) ? s.show : ''
+                     } ${
+                        iconRefs.current[index]?.classList.contains(s.inactive) ? s.inactive : ''
+                     } ${currentRubric?.id === rubrics[index].id ? s.active : ''}`}
                      ref={(el) => (iconRefs.current[index] = el)}>
                      <div className={s.sidebar__icon}>
                         <img src={icon} alt={`icon-${index}`} />

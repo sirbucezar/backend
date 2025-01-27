@@ -26,3 +26,20 @@
       height: 100%;
    }
 }
+
+.toaster{
+   button{
+      position: absolute;
+      left: auto;
+      right: -3px;
+      top: 10px;
+      border: none;
+
+      svg{
+         line{
+            stroke-width: 3px;
+         }
+      }
+   }
+
+}

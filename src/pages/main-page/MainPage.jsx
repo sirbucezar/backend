@@ -114,7 +114,7 @@ const MainPage = () => {
 
    return (
       <div className="wrapper">
-         <Toaster richColors position="bottom-right" className="toaster" />
+         <Toaster closeButton richColors position="bottom-right" className="toaster" />
          <div className={s.mainPage}>
             <div className={`${s.mainPage__container} _container`}>
                <Routes>
