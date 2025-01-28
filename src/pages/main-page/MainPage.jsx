@@ -10,7 +10,7 @@ import { Toaster } from 'sonner';
 
 const MainPage = () => {
    const [showVideoEditor, setShowVideoEditor] = useState(false);
-   const [isFeedback, setIsFeedback] = useState(false);
+   const [isFeedback, setIsFeedback] = useState(true);
    const [feedbackData, setFeedbackData] = useState(null);
    const [rubrics, setRubrics] = useState([
       {

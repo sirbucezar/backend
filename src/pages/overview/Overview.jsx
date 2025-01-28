@@ -13,7 +13,44 @@ import LoginForm from '../../components/login-form/LoginForm';
 const Overview = () => {
    const isSmall = useMediaQuery({ maxWidth: 440 });
    const isMobile = useMediaQuery({ maxWidth: 768 });
-   const isTablet = useMediaQuery({ query: '(min-width: 768px) and (max-width: 1024px)' });
+   const isTablet = useMediaQuery({ minWidth: 768, maxWidth: 1024 });
+
+   const calculateSizes = (isSmall, isMobile, isTablet) => {
+      return {
+         deskScale: isSmall ? 0.05 : isMobile ? 0.06 : 0.065,
+         deskPosition: isMobile ? [0.5, -4.5, 0] : [0.25, -5.5, 0],
+         cubePosition: isSmall
+            ? [4, -5, 0]
+            : isMobile
+            ? [5, -5, 0]
+            : isTablet
+            ? [5, -5, 0]
+            : [9, -5.5, 0],
+         reactLogoPosition: isSmall
+            ? [3, 4, 0]
+            : isMobile
+            ? [5, 4, 0]
+            : isTablet
+            ? [5, 4, 0]
+            : [12, 3, 0],
+         ringPosition: isSmall
+            ? [-5, 7, 0]
+            : isMobile
+            ? [-10, 10, 0]
+            : isTablet
+            ? [-12, 10, 0]
+            : [-24, 10, 0],
+         targetPosition: isSmall
+            ? [-5, -10, -10]
+            : isMobile
+            ? [-9, -10, -10]
+            : isTablet
+            ? [-11, -7, -10]
+            : [-13, -13, -10],
+      };
+   };
+
+   const sizes = calculateSizes(isSmall, isMobile, isTablet);
 
    const animDuration = 4;
    let timeout;
@@ -117,9 +154,12 @@ const Overview = () => {
                         // rotation={[x.rotationX, x.rotationY, x.rotationZ]}
                         // position={[0, 0, 0]}
                         // rotation={[0, -Math.PI / 2.0, 0]}
-                        scale={0.5}
-                        position={[0, -40, -10]}
-                        rotation={[-3.3, -1.9, -3.3]}
+                        // scale={0.5}
+                        // position={[0, -40, -10]}
+                        // rotation={[-3.3, -1.9, -3.3]}
+                        scale={sizes.deskScale}
+                        position={sizes.deskPosition}
+                        rotation={[0.1, -Math.PI, 0]}
                      />
                   </HeroCamera>
                   <ambientLight intensity={1} />

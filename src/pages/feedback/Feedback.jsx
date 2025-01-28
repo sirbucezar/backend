@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { Navigate, useNavigate } from 'react-router';
 import Stages from './stages/Stages';
 import s from './styles.module.scss';
+import LoadingScreen from './loading-screen/LoadingScreen';
+import { Link } from 'react-router';
 
 const Feedback = ({ feedbackData, isFeedback }) => {
    let navigate = useNavigate();
@@ -25,7 +27,7 @@ const Feedback = ({ feedbackData, isFeedback }) => {
                   stage: 'Shot Put - Stage1',
                   criterion: 'Glide phase initiated with bent low leg, back to throw',
                   score: '1',
-                  confidence: '0.98',
+                  confidence: '0.2',
                   feedback: {
                      Observation: {
                         title: 'Observation',
@@ -175,42 +177,55 @@ const Feedback = ({ feedbackData, isFeedback }) => {
             ],
          };
 
-         setAnalysisData(dummyResponse);
-         setIsLoading(false);
+         // setAnalysisData(dummyResponse);
+         // setIsLoading(false);
       }, 1200);
 
-      console.log('Server says:', feedbackData);
+      console.log('Server says:', analysisData);
    }, []);
 
    if (isLoading) {
-      return <div className={s.loading}>Loading feedback...</div>;
+      return (
+         <div className={s.loading}>
+            <LoadingScreen />
+         </div>
+      );
    }
 
    if (!analysisData) {
       return <div className={s.error}>Could not find analysis data.</div>;
    }
 
-   const { stageAnalysis, metrics } = analysisData;
-   const overallScore = metrics?.overall_score ?? 0;
+   // useEffect(() => {}, [analysisData]);
 
-   // Convert stageAnalysis object to an array of stage details
-   const stageEntries = Object.keys(stageAnalysis).map((stageKey) => ({
-      name: stageKey,
-      score: stageAnalysis[stageKey]?.score,
-      videoUrl: stageAnalysis[stageKey]?.video_url,
-      feedback: stageAnalysis[stageKey]?.feedback,
-      confidence: stageAnalysis[stageKey]?.confidence,
-   }));
+   //    // const { stageAnalysis, metrics } = analysisData;
+   //    // const overallScore = metrics?.overall_score ?? 0;
+
+   //    // Convert stageAnalysis object to an array of stage details
+   //    // const stageEntries = Object.keys(stageAnalysis).map((stageKey) => ({
+   //    //    name: stageKey,
+   //    //    score: stageAnalysis[stageKey]?.score,
+   //    //    videoUrl: stageAnalysis[stageKey]?.video_url,
+   //    //    feedback: stageAnalysis[stageKey]?.feedback,
+   //    //    confidence: stageAnalysis[stageKey]?.confidence,
+   //    // }));
 
    return (
       <div className={s.feedback}>
          <div className={s.feedback__top}>
             <h1 className={s.feedback__title}>Rubric: Shot Put</h1>
-            <div className={s.feedback__score}>{overallScore}/5</div>
+            <div className={s.feedback__score}>4/5</div>
          </div>
 
          {/* Render stage cards */}
-         <Stages stageEntries={stageEntries} />
+         {/* {!!analysisData && } */}
+         <Stages stageEntries={analysisData.feedback} />
+         <div className={s.feedback__bottom}>
+            <Link to="/" className={s.feedback__btnNew}>
+               New analysis
+            </Link>
+            <button className={s.feedback__btn}>Download report</button>
+         </div>
       </div>
    );
 };

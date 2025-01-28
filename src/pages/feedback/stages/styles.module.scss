@@ -1,4 +1,5 @@
 .stages {
+  color: #f1f1f1;
    &__list {
      display: grid;
      grid-template-columns: repeat(5, 1fr);
@@ -11,7 +12,7 @@
      color: #f1f1f1;
      background: rgb(24, 24, 27);
      border-radius: 24px;
-     padding: 24px 30px;
+     padding: 32px 30px;
      line-height: 1.25;
      min-height: 130px;
      display: flex;
@@ -19,6 +20,7 @@
      position: relative;
      transition: transform 0.2s ease-in-out;
      justify-content: center;
+     cursor: pointer;
 
      &:not(.stages__itemExpanded):hover {
       transform: scale(1.1) !important;
@@ -48,19 +50,94 @@
    }
  
    .stages {
-      &__itemExpanded {
-        position: fixed; 
-        top: 0; 
+
+      &__overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.7);
+        position: fixed;
+        width: 100%;
+        min-height: 100vh;
+        overflow-y: auto;
+        top: 0;
         left: 0;
-        z-index: 10000;
-        width: 1000px; 
-        max-width: 1000px;
-        min-height: 500px;
+        opacity: 0;
+        visibility: hidden;
+        
+        transition: all .4s ease-in-out;
+
+        .stages__itemExpanded{
+          transform: scale(0);
+        }
+        
+
+        &.active{
+          opacity: 1;
+          visibility: visible;
+          
+          .stages__itemExpanded{
+            transform: scale(1);
+          }
+        }
+      }
+
+      &__container{
         display: flex;
-        flex-direction: column;
-        padding: 24px;
-        align-items: flex-start;
-        border: 6px solid transparent;
+        align-items: center;
+        justify-content: center;
+        padding: 30px 15px;
+        min-height: 100%;
+      }
+
+      &__itemExpanded {
+        // position: fixed; 
+        // top: 0; 
+        // left: 0;
+        position: relative;
+        z-index: 10000;
+        max-width: 1200px;
+        width: 100%;
+        // max-width: 1000px;
+        // display: flex;
+        // flex-direction: column;
+        // padding: 24px;
+        // align-items: flex-start;
+        // border: 6px solid transparent;
+        font-size: 20px;
+        font-weight: 600;
+        color: #f1f1f1;
+        background: rgb(24, 24, 27);
+        border-radius: 24px;
+        padding: 40px 30px;
+        line-height: 1.25;
+        min-height: 130px;
+        display: flex;
+        align-items: center;
+        position: relative;
+        transition: transform 0.4s ease-in-out;
+        justify-content: center;
+
+        &:before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 50%;
+          width: 76%;
+          height: 6px;
+          border-radius: 20px;
+          transform: translate(-50%, -50%);
+        }
+    
+        &:after {
+          content: '';
+          position: absolute;
+          bottom: 0;
+          left: 50%;
+          width: 76%;
+          height: 6px;
+          border-radius: 20px;
+          transform: translate(-50%, 50%);
+        }
       }
     
       .borderAnimation {
@@ -92,29 +169,67 @@
     }
    }
  
-   &__overlay {
-     position: fixed;
-     inset: 0;
-     background: rgba(0, 0, 0, 0.7);
-     z-index: 999; 
-   }
- 
+
    .closeButton {
      position: absolute;
-     top: 8px;
-     right: 16px;
+     top: 12px;
+     right: 14px;
      background: transparent;
      border: none;
      font-size: 16px;
-     cursor: hand;
-     color: #f1f1f1;
+     cursor: pointer;
+     z-index: 100;
+
+     svg{
+      path{
+        stroke: #333;
+        transition: all .3s ease-in-out;
+      }
+     }
+
+     @media(any-hover: hover){
+      &:hover{
+        svg{
+          path{
+            stroke: #eee;
+          }
+        }
+      }
+     }
    }
  
    &__video {
-     margin-top: 1rem;
      width: 100%;
      max-height: 600px;
    }
+ }
+
+ .expandedStage{
+  &__feedbackTitle{
+    font-size: 24px;
+    font-weight: 600;
+    margin: 0px 0px 8px 0px;
+  }
+  &__feedbackText{
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  &__feedbackItem{
+
+  }
+  &__feedbackItemTitle{
+    font-size: 18px;
+    font-weight: 500;
+    color: #f1f1f1;
+    margin: 0px 0px 6px 0px;
+  }
+  &__feedbackItemDescr{
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 1.4;
+    color: #eee;
+  }
  }
  
  /* 2-column layout within the expanded item */
@@ -127,30 +242,35 @@
  }
  
  .expandedStage__left {
-   flex: 2; // 2 parts
+   flex: 6; // 2 parts
    display: flex;
    flex-direction: column;
  }
  
  .expandedStage__right {
-   flex: 3; // 3 parts
+   flex: 8; // 3 parts
    display: flex;
-   align-items: flex-start;
+   align-items: center;
    justify-content: center;
+
+   video{
+    border-radius: 14px;
+    overflow: hidden;
+   }
  }
  
  .expandedStage__title {
    font-size: 32px;
    margin-bottom: 12px;
-   text-transform: uppercase;
    // Remove color override so it stays white
  }
  
  .expandedStage__tags {
    display: flex;
    flex-direction: row;
-   gap: 8px;
-   margin-bottom: 12px;
+   flex-wrap: wrap;
+   gap: 10px;
+   margin-bottom: 10px;
  }
  
  .expandedStage__divider {
@@ -160,16 +280,6 @@
    margin: 16px 0;
  }
  
- .expandedStage__feedbackTitle {
-   font-size: 20px;
-   font-weight: 600;
-   margin-bottom: 6px;
- }
- 
- .expandedStage__feedbackText {
-   font-size: 16px;
-   line-height: 1.4;
- }
  
  /* Score-based color classes (for lines only) */
  .red {
@@ -194,13 +304,15 @@
  
  /* Tag classes */
  .tag {
-   display: inline-block;
-   padding: 4px 12px;
-   border-radius: 16px;
-   font-weight: 600;
-   color: #fff;
-   font-size: 14px;
-   align-self: flex-start;
+  padding: 8px 14px;
+    border-radius: 30px;
+    font-weight: 600;
+    color: #eee;
+    font-size: 14px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    line-height: 1;
  }
  .tagDefault {
    background: #666;
@@ -214,9 +326,57 @@
  .tagGreen {
    background: #2ecc71;
  }
- .tagConfidence {
-   // We'll override background inline with style={...}
- }
- .tagGrey {
-   background: #555;
- }
+
+/* Confidence classes */
+.confidence {
+  padding: 8px 14px;
+  border-radius: 30px;
+  font-weight: 600;
+  color: #eee;
+  font-size: 14px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: 1px solid transparent;
+  line-height: 1;
+}
+.confidenceDefault {
+  background: #666;
+}
+.confidenceBad {
+  background: rgba(#d93030, 0.05);
+  border-color: #d93030;
+}
+.confidenceMid {
+  background: rgba(#FFCC33, 0.05);
+  border-color: #FFCC33;
+}
+.confidenceGood {
+  background: rgba(#2ecc71, 0.05);
+  border-color: #2ecc71;
+}
+
+.injuryRisk{
+  padding: 8px 14px 8px 32px;
+  border-radius: 30px;
+  font-weight: 600;
+  color: #eee;
+  font-size: 14px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  line-height: 1;
+  background: rgba(#FFCC33, 0.05);
+  border: 1px solid #FFCC33;
+  position: relative;
+  cursor: pointer;
+
+  svg{
+    position: absolute;
+    top: 50%;
+    left: 6px;
+    width: 22px;
+    height: 22px;
+    transform: translate(0,-41%);
+  }
+}

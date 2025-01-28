@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import ExampleSrc from '/video/example.mp4';
 import s from './styles.module.scss';
 
 const BorderSnakeAnimation = ({ color, isExpanded }) => {
@@ -16,31 +17,61 @@ const BorderSnakeAnimation = ({ color, isExpanded }) => {
    );
 };
 
-const Stages = ({ stageEntries, videoWidth = '100%', videoHeight = '350px' }) => {
+const Stages = ({ stageEntries }) => {
    const [expandedStage, setExpandedStage] = useState(null);
    const [isFullyExpanded, setIsFullyExpanded] = useState(false);
    const [animateStages, setAnimateStages] = useState(false);
    const originalPositionRef = useRef(null);
+   const expandedRef = useRef(null);
 
    useEffect(() => {
       setAnimateStages(true);
    }, []);
 
-   const getStageClass = (score) => {
+   useEffect(() => {
+      const handleOutsideClick = (event) => {
+         if (
+            expandedRef.current &&
+            !expandedRef.current.contains(event.target) &&
+            expandedStage !== null
+         ) {
+            handleClose();
+         }
+      };
+
+      document.addEventListener('mousedown', handleOutsideClick);
+
+      return () => {
+         document.removeEventListener('mousedown', handleOutsideClick);
+      };
+   }, [expandedStage]);
+
+   const getStageClass = (predScore) => {
+      const score = Number(predScore);
       if (score === 0) return s.red;
       if (score === 0.5) return s.purple;
       if (score === 1) return s.green;
       return '';
    };
 
-   const getScoreTagClass = (score) => {
+   const getScoreTagClass = (predScore) => {
+      const score = Number(predScore);
       if (score === 0) return s.tagRed;
       if (score === 0.5) return s.tagPurple;
       if (score === 1) return s.tagGreen;
       return s.tagDefault;
    };
 
-   const getBorderColor = (score) => {
+   const getScoreConfidenceClass = (predConfidence) => {
+      const confidence = Number(predConfidence);
+      if (confidence < 0.3) return s.confidenceBad;
+      else if (confidence < 0.8) return s.confidenceMid;
+      else if (confidence <= 1) return s.confidenceGood;
+      return s.confidenceDefault;
+   };
+
+   const getBorderColor = (predScore) => {
+      const score = Number(predScore);
       if (score === 0) return '#d93030';
       if (score === 0.5) return '#8638eb';
       if (score === 1) return '#2ecc71';
@@ -51,13 +82,16 @@ const Stages = ({ stageEntries, videoWidth = '100%', videoHeight = '350px' }) =>
       const rect = event.currentTarget.getBoundingClientRect();
       originalPositionRef.current = rect;
       setExpandedStage(index);
+      setTimeout(() => {
+         setIsFullyExpanded(true);
+      }, 0);
    };
 
    const handleClose = () => {
       setIsFullyExpanded(false);
       setTimeout(() => {
          setExpandedStage(null);
-      }, 300);
+      }, 400);
    };
 
    return (
@@ -75,7 +109,7 @@ const Stages = ({ stageEntries, videoWidth = '100%', videoHeight = '350px' }) =>
                      duration: 0.2,
                      delay: index * 0.1,
                   }}>
-                  {stage.name.toUpperCase()}
+                  {stage.criterion}
                </motion.li>
             ))}
          </ul>
@@ -83,103 +117,176 @@ const Stages = ({ stageEntries, videoWidth = '100%', videoHeight = '350px' }) =>
          <AnimatePresence>
             {expandedStage !== null && (
                <>
-                  <motion.div
-                     className={s.stages__overlay}
-                     initial={{ opacity: 0 }}
-                     animate={{ opacity: 1 }}
-                     exit={{ opacity: 0 }}
-                     onClick={handleClose}
-                  />
+                  <div
+                     className={`${s.stages__overlay} ${isFullyExpanded ? s.active : ''}`}
+                     // onClick={handleClose}
+                  >
+                     <div className={s.stages__container}>
+                        <li
+                           ref={expandedRef}
+                           className={`
+                        ${s.stages__itemExpanded}
+                        ${getStageClass(stageEntries[expandedStage].score)}
+                        `}>
+                           <button className={s.closeButton} onClick={handleClose}>
+                              <svg
+                                 width="24"
+                                 height="24"
+                                 viewBox="0 0 24 24"
+                                 fill="none"
+                                 xmlns="http://www.w3.org/2000/svg">
+                                 <path
+                                    d="M15 9L9 15M9 9L15 15M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z"
+                                    stroke="black"
+                                    strokeWidth="2"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                 />
+                              </svg>
+                           </button>
+                           <div className={s.expandedStage__content}>
+                              <div className={s.expandedStage__left}>
+                                 <h2 className={s.expandedStage__title}>
+                                    {stageEntries[expandedStage].stage}
+                                 </h2>
 
-                  <motion.li
-                     className={`
-                 ${s.stages__item}
-                 ${s.stages__itemExpanded}
-                 ${getStageClass(stageEntries[expandedStage].score)}
-               `}
-                     initial={{
-                        top: originalPositionRef.current?.top || 0,
-                        left: originalPositionRef.current?.left || 0,
-                        width: originalPositionRef.current?.width || 0,
-                        height: originalPositionRef.current?.height || 0,
-                        border: '6px solid transparent',
-                     }}
-                     animate={{
-                        top: '0',
-                        left: '0',
-                        width: '1000px',
-                        height: 'auto',
-                        border: '6px solid transparent',
-                        transition: {
-                           type: 'tween',
-                           duration: 0.4,
-                           ease: 'easeOut',
-                           onComplete: () => setIsFullyExpanded(true),
-                        },
-                     }}
-                     exit={{
-                        top: originalPositionRef.current?.top || 0,
-                        left: originalPositionRef.current?.left || 0,
-                        width: originalPositionRef.current?.width || -50,
-                        height: 0, // Collapse the height to merge top/bottom borders
-                        opacity: 0,
-                        borderTop: '6px solid transparent',
-                        borderBottom: '6px solid transparent', // Keep bottom border visible initially
-                        borderLeft: '0px solid transparent',
-                        borderRight: '0px solid transparent',
-                        transition: {
-                           duration: 0.3,
-                           ease: 'easeInOut',
-                        },
-                     }}>
-                     <BorderSnakeAnimation
-                        color={getBorderColor(stageEntries[expandedStage].score)}
-                        isExpanded={isFullyExpanded}
-                     />
+                                 <div className={s.expandedStage__tags}>
+                                    <span
+                                       className={`${s.tag} ${getScoreTagClass(
+                                          stageEntries[expandedStage].score,
+                                       )}`}>
+                                       Score: {stageEntries[expandedStage].score}
+                                    </span>
 
-                     <button className={s.closeButton} onClick={handleClose}>
-                        x
-                     </button>
+                                    <span
+                                       className={`${s.confidence} ${getScoreConfidenceClass(
+                                          stageEntries[expandedStage].confidence,
+                                       )}`}>
+                                       Confidence: {stageEntries[expandedStage].confidence}
+                                    </span>
+                                    {stageEntries[expandedStage].injury_risk.high_risk && (
+                                       <span className={s.injuryRisk}>
+                                          <svg
+                                             width="31"
+                                             height="30"
+                                             viewBox="0 0 31 30"
+                                             fill="none"
+                                             xmlns="http://www.w3.org/2000/svg">
+                                             <g filter="url(#filter0_d_381_2)">
+                                                <path
+                                                   d="M16.0004 9V13M16.0004 17H16.0104M25.7304 18L17.7304 4C17.556 3.69221 17.303 3.43619 16.9973 3.25807C16.6917 3.07995 16.3442 2.98611 15.9904 2.98611C15.6366 2.98611 15.2892 3.07995 14.9835 3.25807C14.6778 3.43619 14.4249 3.69221 14.2504 4L6.25042 18C6.0741 18.3054 5.98165 18.6519 5.98243 19.0045C5.98321 19.3571 6.0772 19.7033 6.25486 20.0078C6.43253 20.3124 6.68757 20.5646 6.99411 20.7388C7.30066 20.9131 7.64783 21.0032 8.00042 21H24.0004C24.3513 20.9996 24.6959 20.907 24.9997 20.7313C25.3035 20.5556 25.5556 20.3031 25.7309 19.9991C25.9062 19.6951 25.9985 19.3504 25.9984 18.9995C25.9983 18.6486 25.9059 18.3039 25.7304 18Z"
+                                                   stroke="#FFCC33"
+                                                   strokeWidth="2"
+                                                   strokeLinecap="round"
+                                                   strokeLinejoin="round"
+                                                />
+                                             </g>
+                                             <defs>
+                                                <filter
+                                                   id="filter0_d_381_2"
+                                                   x="0"
+                                                   y="0"
+                                                   width="32"
+                                                   height="32"
+                                                   filterUnits="userSpaceOnUse"
+                                                   colorInterpolationFilters="sRGB">
+                                                   <feFlood
+                                                      floodOpacity="0"
+                                                      result="BackgroundImageFix"
+                                                   />
+                                                   <feColorMatrix
+                                                      in="SourceAlpha"
+                                                      type="matrix"
+                                                      values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"
+                                                      result="hardAlpha"
+                                                   />
+                                                   <feOffset dy="4" />
+                                                   <feGaussianBlur stdDeviation="2" />
+                                                   <feComposite in2="hardAlpha" operator="out" />
+                                                   <feColorMatrix
+                                                      type="matrix"
+                                                      values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.25 0"
+                                                   />
+                                                   <feBlend
+                                                      mode="normal"
+                                                      in2="BackgroundImageFix"
+                                                      result="effect1_dropShadow_381_2"
+                                                   />
+                                                   <feBlend
+                                                      mode="normal"
+                                                      in="SourceGraphic"
+                                                      in2="effect1_dropShadow_381_2"
+                                                      result="shape"
+                                                   />
+                                                </filter>
+                                             </defs>
+                                          </svg>
+                                          <span>Injury risk</span>
+                                       </span>
+                                    )}
+                                 </div>
 
-                     {isFullyExpanded && (
-                        <motion.div
-                           className={s.expandedStage__content}
-                           initial={{ opacity: 0, scale: 0.9 }}
-                           animate={{ opacity: 1, scale: 1 }}
-                           transition={{ duration: 0.3 }}>
-                           <div className={s.expandedStage__left}>
-                              <h2 className={s.expandedStage__title}>
-                                 {stageEntries[expandedStage].name.toUpperCase()}
-                              </h2>
+                                 <div className={s.expandedStage__divider}></div>
 
-                              <div className={s.expandedStage__tags}>
-                                 <span
-                                    className={`${s.tag} ${getScoreTagClass(
-                                       stageEntries[expandedStage].score,
-                                    )}`}>
-                                    Score: {stageEntries[expandedStage].score}
-                                 </span>
+                                 <h3 className={s.expandedStage__feedbackTitle}>Feedback:</h3>
+                                 <div className={s.expandedStage__feedbackText}>
+                                    <div className={s.expandedStage__feedbackItem}>
+                                       <div className={s.expandedStage__feedbackItemTitle}>
+                                          {stageEntries[expandedStage].feedback.Observation.title}
+                                       </div>
+                                       <div className={s.expandedStage__feedbackItemDescr}>
+                                          {stageEntries[expandedStage].feedback.Observation.body}
+                                       </div>
+                                    </div>
+                                    <div className={s.expandedStage__feedbackItem}>
+                                       <div className={s.expandedStage__feedbackItemTitle}>
+                                          {
+                                             stageEntries[expandedStage].feedback[
+                                                'Improvement Suggestion'
+                                             ].title
+                                          }
+                                       </div>
+                                       <div className={s.expandedStage__feedbackItemDescr}>
+                                          {
+                                             stageEntries[expandedStage].feedback[
+                                                'Improvement Suggestion'
+                                             ].body
+                                          }
+                                       </div>
+                                    </div>
+                                    <div className={s.expandedStage__feedbackItem}>
+                                       <div className={s.expandedStage__feedbackItemTitle}>
+                                          {stageEntries[expandedStage].feedback.Justification.title}
+                                       </div>
+                                       <div className={s.expandedStage__feedbackItemDescr}>
+                                          {stageEntries[expandedStage].feedback.Justification.body}
+                                       </div>
+                                    </div>
+                                    <div className={s.expandedStage__feedbackItem}>
+                                       <div className={s.expandedStage__feedbackItemTitle}>
+                                          {stageEntries[expandedStage].feedback.Encouragement.title}
+                                       </div>
+                                       <div className={s.expandedStage__feedbackItemDescr}>
+                                          {stageEntries[expandedStage].feedback.Encouragement.body}
+                                       </div>
+                                    </div>
+                                 </div>
                               </div>
 
-                              <div className={s.expandedStage__divider}></div>
-
-                              <h3 className={s.expandedStage__feedbackTitle}>Feedback:</h3>
-                              <p className={s.expandedStage__feedbackText}>
-                                 {stageEntries[expandedStage].feedback}
-                              </p>
+                              <div className={s.expandedStage__right}>
+                                 <video
+                                    autoPlay
+                                    muted
+                                    playsInline
+                                    loop
+                                    src={ExampleSrc}
+                                    className={s.stages__video}
+                                 />
+                              </div>
                            </div>
-
-                           <div className={s.expandedStage__right}>
-                              <video
-                                 src={stageEntries[expandedStage].videoUrl}
-                                 controls
-                                 style={{ width: videoWidth, height: videoHeight }}
-                                 className={s.stages__video}
-                              />
-                           </div>
-                        </motion.div>
-                     )}
-                  </motion.li>
+                        </li>
+                     </div>
+                  </div>
                </>
             )}
          </AnimatePresence>
