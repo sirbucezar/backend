@@ -166,8 +166,8 @@ const NewAnalysis = ({
       setHints(newHints);
 
       // * local
-      setShowVideoEditor(true);
-      return;
+      // setShowVideoEditor(true);
+      // return;
 
       // Actually do the upload
       try {
@@ -238,8 +238,8 @@ const NewAnalysis = ({
 
    // 4) GET SAS
    const getSasForFile = async (filename) => {
-      const functionUrl = `https://dotnet-fapp.azurewebsites.net/api/GetSasToken`;
-      const functionKey = `3-172eA71LvFWcg-aWsKHJlQu_VyQ0aFe9lxR0BrQsAJAzFux1i_pA%3D%3D`;
+      const functionUrl = process.env.SasFunctionUrl;
+      const functionKey = process.env.SasFunctionKey;
       const reqUrl = `${functionUrl}?code=${functionKey}&filename=${encodeURIComponent(filename)}`;
 
       const resp = await fetch(reqUrl);
@@ -296,8 +296,8 @@ const NewAnalysis = ({
       };
       // console.log(payload);
 
-      const functionUrl = 'https://dotnet-fapp.azurewebsites.net/api/process_video';
-      const functionKey = '3-172eA71LvFWcg-aWsKHJlQu_VyQ0aFe9lxR0BrQsAJAzFux1i_pA%3D%3D';
+      const functionUrl = process.env.ProcessVideoFunctionUrl;
+      const functionKey = process.env.ProcessVideoFunctionKey;
       const requestUrl = `${functionUrl}?code=${functionKey}`;
 
       const resp = await fetch(requestUrl, {
