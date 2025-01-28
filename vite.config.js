@@ -6,6 +6,9 @@ export default defineConfig({
    css: {
       postcss: './postcss.config.js',
    },
+   define: {
+      'process.env': {},
+   },
    server: {
       headers: {
          'Cross-Origin-Opener-Policy': 'same-origin',
