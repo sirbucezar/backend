@@ -120,7 +120,7 @@ const Sidebar = ({ rubrics, currentRubric, setCurrentRubric }) => {
 
    const handleRubricClick = (rubric) => {
       setCurrentRubric(rubric);
-      toast.success(`Rubric ${rubric.name} is chosen`);
+      toast.success(`Rubric ${rubric.name}`);
    };
 
    return (

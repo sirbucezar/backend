@@ -21,9 +21,9 @@ const VideoEditor = ({
    setEndFrame,
    isDurationValid,
    setIsDurationValid,
+   currentStage,
+   setCurrentStage,
 }) => {
-   const [currentStage, setCurrentStage] = useState(0);
-
    const videoRef = useRef(null);
    const trackRef = useRef(null);
    const [progress, setProgress] = useState(0);

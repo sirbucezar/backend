@@ -11,6 +11,7 @@ import VideoCut from './video-cut/VideoCut ';
 import { createFFmpeg, fetchFile } from '@ffmpeg/ffmpeg';
 import ExampleVideo from './example-video/ExampleVideo';
 import { generateUUID } from 'three/src/math/MathUtils.js';
+import VideoHint from './video-editor/video-hint/VideoHint';
 
 const NewAnalysis = ({
    rubrics,
@@ -55,6 +56,8 @@ const NewAnalysis = ({
    const [isDurationValid, setIsDurationValid] = useState(false);
 
    // Local “rubric” with 5 stages that store frames, not timestamps
+   const [hints, setHints] = useState(null);
+   const [currentStage, setCurrentStage] = useState(0);
    const [rubric, setRubric] = useState({
       video_id: '',
       stages: [
@@ -157,9 +160,14 @@ const NewAnalysis = ({
          return;
       }
 
+      const newHints = rubrics.filter((el) => {
+         if (el.id === currentRubric.id) return true;
+      })[0].hints;
+      setHints(newHints);
+
       // * local
-      // setShowVideoEditor(true);
-      // return;
+      setShowVideoEditor(true);
+      return;
 
       // Actually do the upload
       try {
@@ -409,6 +417,8 @@ const NewAnalysis = ({
                   setStartFrame={setStartFrame}
                   endFrame={endFrame}
                   setEndFrame={setEndFrame}
+                  currentStage={currentStage}
+                  setCurrentStage={setCurrentStage}
                />
             ) : showVideoCut ? (
                <VideoEditor
@@ -463,36 +473,41 @@ const NewAnalysis = ({
             )}
             {showVideoCut && (
                <div className={s.newAnalysis__right}>
-                  <div className={s.newAnalysis__cutTitle}>Cut the video</div>
-                  <p className={s.newAnalysis__descr}>
-                     Video is too long, please cut it to 30 seconds
-                  </p>
-                  <div className={s.newAnalysis__time}>
-                     <div className={s.newAnalysis__cut}>
-                        From <span>{fromTime}</span>
+                  <div className={s.newAnalysis__mainBlock}>
+                     <div className={s.newAnalysis__cutTitle}>Cut the video</div>
+                     <p className={s.newAnalysis__descr}>
+                        Video is too long, please cut it to 30 seconds
+                     </p>
+                     <div className={s.newAnalysis__time}>
+                        <div className={s.newAnalysis__cut}>
+                           From <span>{fromTime}</span>
+                        </div>
+                        <div className={s.newAnalysis__cut}>
+                           To <span>{toTime}</span>
+                        </div>
                      </div>
-                     <div className={s.newAnalysis__cut}>
-                        To <span>{toTime}</span>
-                     </div>
+                     <button
+                        className={s.newAnalysis__cutBtn}
+                        onClick={handleSaveVideo}
+                        disabled={!isDurationValid}>
+                        Save video
+                     </button>
                   </div>
-                  <button
-                     className={s.newAnalysis__cutBtn}
-                     onClick={handleSaveVideo}
-                     disabled={!isDurationValid}>
-                     Save video
-                  </button>
                </div>
             )}
             {showVideoEditor && (
                <div className={s.newAnalysis__right}>
-                  <div className={s.newAnalysis__cutTitle}>Analyze video</div>
-                  <p className={s.newAnalysis__descr}>Complete all stages to get feedback</p>
-                  <button
-                     className={s.newAnalysis__cutBtn}
-                     onClick={handleAnalyze}
-                     disabled={isLoading}>
-                     {isLoading ? 'Processing...' : 'Analyze'}
-                  </button>
+                  <div className={s.newAnalysis__mainBlock}>
+                     <div className={s.newAnalysis__cutTitle}>Analyze video</div>
+                     <p className={s.newAnalysis__descr}>Complete all stages to get feedback</p>
+                     <button
+                        className={s.newAnalysis__cutBtn}
+                        onClick={handleAnalyze}
+                        disabled={isLoading}>
+                        {isLoading ? 'Processing...' : 'Analyze'}
+                     </button>
+                  </div>
+                  <VideoHint currentStage={currentStage} hints={hints} />
                </div>
             )}
          </div>

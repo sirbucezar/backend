@@ -23,6 +23,13 @@ const MainPage = () => {
             'Body positioned like "a spear" during push-off',
             'Gaze directed slightly forward toward ground',
          ],
+         hints: [
+            'Select the starting position when the athlete is in the "set" stance.',
+            'Cut to include the push-off phase where both legs powerfully extend.',
+            'Include the transition where the body moves into a spear-like position.',
+            'Ensure the gaze and head alignment are visible in the video.',
+            'End the cut just after the athlete begins forward motion.',
+         ],
       },
       {
          id: 1,
@@ -33,6 +40,13 @@ const MainPage = () => {
             'Active clawing motion of legs',
             'Arms at 90° actively moving',
             'Center of mass leans forward',
+         ],
+         hints: [
+            'Start the cut when the athlete begins the sprint.',
+            'Capture the running form showing knees lifting high.',
+            'Ensure the clawing motion of legs is visible.',
+            'Include the movement of arms at 90° angles.',
+            'End the cut when the sprint reaches full speed.',
          ],
       },
       {
@@ -45,6 +59,13 @@ const MainPage = () => {
             'Push leg extends, hip-torso-arm sequence begins',
             'Shot remains at neck until 45° release',
          ],
+         hints: [
+            'Begin the cut with the athlete initiating the glide phase.',
+            'Include the moment when the trailing leg pulls under the pelvis.',
+            'Capture the bracing leg plant and push leg action.',
+            'Focus on the hip-torso-arm movement leading to the throw.',
+            'End the cut right after the shot is released.',
+         ],
       },
       {
          id: 3,
@@ -55,6 +76,13 @@ const MainPage = () => {
             'Full knee lift during takeoff, arm lifted high',
             'Clears bar with an arched back',
             'Lands on mat in "L" shape, perpendicular to bar',
+         ],
+         hints: [
+            'Start the cut during the accelerating approach.',
+            'Include the leaning motion into the curve.',
+            'Focus on the takeoff with knee lift and arm motion.',
+            'Capture the athlete clearing the bar with an arched back.',
+            'End the cut when the athlete lands on the mat.',
          ],
       },
       {
@@ -67,6 +95,13 @@ const MainPage = () => {
             'Torso and opposite arm align with lead leg',
             'Large stride for second contact post-hurdle',
          ],
+         hints: [
+            'Start the cut during the 8-step approach.',
+            'Capture the clearing of the first hurdle.',
+            'Focus on the lead leg fully extending over the hurdle.',
+            'Include the alignment of torso and opposite arm.',
+            'End the cut after the large stride following the hurdle.',
+         ],
       },
       {
          id: 5,
@@ -77,6 +112,13 @@ const MainPage = () => {
             'Takeoff foot flat, center of mass above it',
             'Knight stance maintained during first half',
             'Landing with sliding technique',
+         ],
+         hints: [
+            'Begin the cut with the accelerating approach.',
+            'Include the moment when the foot lands on the white plank.',
+            'Focus on the takeoff phase with proper form.',
+            'Capture the knight stance in the air.',
+            'End the cut after the athlete lands with a sliding technique.',
          ],
       },
       {
@@ -89,6 +131,13 @@ const MainPage = () => {
             'Throw starts low-to-high with hip engagement',
             'Discus released via index finger',
          ],
+         hints: [
+            'Start the cut as the throwing arm swings back.',
+            'Include the pivot initiated from the ball of the foot.',
+            'Focus on the flat pivot toward the circle center.',
+            'Capture the throw starting low-to-high with hip motion.',
+            'End the cut at the discus release.',
+         ],
       },
       {
          id: 7,
@@ -100,6 +149,13 @@ const MainPage = () => {
             'Blocking step executed',
             'Throw initiated through hip-torso involvement',
          ],
+         hints: [
+            'Begin the cut with the javelin brought backward in the last steps.',
+            'Include the rotation of the pelvis and javelin retraction.',
+            'Focus on the execution of the impulse step.',
+            'Capture the blocking step before the throw.',
+            'End the cut at the moment of javelin release.',
+         ],
       },
       {
          id: 8,
@@ -110,6 +166,13 @@ const MainPage = () => {
             'Baton exchange occurs at speed after agreed signal',
             'Baton switched hands, runner stays in lane',
             'Exchange occurs within the zone',
+         ],
+         hints: [
+            'Start the cut when the receiver begins moving after the mark.',
+            'Include the receiver reaching maximum speed.',
+            'Capture the baton exchange at full speed.',
+            'Focus on the baton switching hands and the runner staying in lane.',
+            'End the cut after the baton is exchanged within the zone.',
          ],
       },
    ]);

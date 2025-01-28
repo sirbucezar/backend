@@ -98,10 +98,7 @@
    }
 
    &__right{
-      background: rgb(24 24 27);
       align-self: flex-start;
-      padding: 35px 30px;
-      border-radius: 24px;
       flex: 0 0 26%;
       width: 26%;
 
@@ -117,6 +114,12 @@
       //    width: 100%;
       //    flex: 1 1 auto;
       // }
+   }
+
+   &__mainBlock{
+      background: rgb(24 24 27);
+      padding: 35px 30px;
+      border-radius: 24px;
    }
 
    &__cutTitle{
