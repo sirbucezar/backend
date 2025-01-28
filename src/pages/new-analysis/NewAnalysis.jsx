@@ -238,8 +238,8 @@ const NewAnalysis = ({
 
    // 4) GET SAS
    const getSasForFile = async (filename) => {
-      const functionUrl = process.env.REACT_APP_SasFunctionUrl;
-      const functionKey = process.env.REACT_APP_SasFunctionKey;
+      const functionUrl = import.meta.env.VITE_SasFunctionUrl;
+      const functionKey = import.meta.env.VITE_SasFunctionKey;
       const reqUrl = `${functionUrl}?code=${functionKey}&filename=${encodeURIComponent(filename)}`;
 
       const resp = await fetch(reqUrl);
@@ -296,8 +296,8 @@ const NewAnalysis = ({
       };
       // console.log(payload);
 
-      const functionUrl = process.env.REACT_APP_ProcessVideoFunctionUrl;
-      const functionKey = process.env.REACT_APP_ProcessVideoFunctionKey;
+      const functionUrl = import.meta.env.VITE_ProcessVideoFunctionUrl;
+      const functionKey = import.meta.env.VITE_ProcessVideoFunctionKey;
       const requestUrl = `${functionUrl}?code=${functionKey}`;
 
       const resp = await fetch(requestUrl, {
