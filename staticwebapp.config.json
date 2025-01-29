@@ -3,7 +3,8 @@
     {
       "route": "/*",
       "headers": {
-        "Content-Security-Policy": "default-src 'self' blob:; connect-src 'self' blob: https://dotnet-funcapp.azurewebsites.net https://athleticstorage.blob.core.windows.net https://unpkg.com https://www.gstatic.com; script-src 'self' 'unsafe-eval' blob: https://www.gstatic.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://www.gstatic.com;",
+        "Content-Security-Policy": "default-src 'self' blob:; connect-src 'self' blob: https://dotnet-funcapp.azurewebsites.net https://athleticstorage2.blob.core.windows.net https://unpkg.com https://www.gstatic.com; script-src 'self' 'unsafe-eval' blob: https://www.gstatic.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://www.gstatic.com;",
+          
         "Access-Control-Allow-Origin": "*",
         "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
         "Access-Control-Allow-Headers": "Content-Type, Authorization",
