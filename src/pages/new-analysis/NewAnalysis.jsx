@@ -195,15 +195,16 @@ const NewAnalysis = ({
    };
 
    const handleAnalyze = async () => {
-      // * local
-      // setIsFeedback(true);
-      // navigate('/feedback');
-
       // must have all 5 stages saved
       if (!isStagesSaved) {
          toast.error('Please save all 5 stages before analyzing');
          return;
       }
+
+      // * local
+      setIsFeedback(true);
+      navigate('/feedback');
+
       if (!sasUrl) {
          toast.error('No SAS URL found. Did you upload the video first?');
          return;
