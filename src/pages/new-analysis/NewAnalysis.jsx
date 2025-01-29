@@ -260,6 +260,7 @@ const NewAnalysis = ({
          headers: {
             'x-ms-blob-type': 'BlockBlob',
             'Content-Type': file.type,
+            'Access-Control-Allow-Origin': '*',
          },
          body: file,
       });
