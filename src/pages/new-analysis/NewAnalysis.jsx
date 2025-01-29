@@ -300,10 +300,11 @@ const NewAnalysis = ({
       };
       // console.log(payload);
 
-      const functionUrl = 'https://dotnet-funcapp.azurewebsites.net/api/process_video';
-      const functionKey =
-         import.meta.env.VITE_ProcessVideoFunctionKey || process.env.VITE_ProcessVideoFunctionKey;
-      const requestUrl = `${functionUrl}?code=${functionKey}`;
+      const functionUrl =
+         'https://athleticstorage2.blob.core.windows.net/uploads?sp=r&st=2025-01-29T05:54:09Z&se=2025-03-13T13:54:09Z&sv=2022-11-02&sr=c&sig=JRmjls7tch8Yw9Gev5VRReWyo%2Bc5JbUJCdlr8cuIIpQ%3D';
+      // const functionKey =
+      //    import.meta.env.VITE_ProcessVideoFunctionKey || process.env.VITE_ProcessVideoFunctionKey;
+      const requestUrl = `${functionUrl}`;
 
       const resp = await fetch(requestUrl, {
          method: 'POST',
