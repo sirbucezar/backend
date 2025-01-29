@@ -305,6 +305,7 @@ const NewAnalysis = ({
       const functionUrl = 'https://dotnet-funcapp.azurewebsites.net/api/process_video';
       const functionKey =
          import.meta.env.VITE_ProcessVideoFunctionKey || process.env.VITE_ProcessVideoFunctionKey;
+      console.log(functionKey, 'functionKey');
       const requestUrl = `${functionUrl}?code=${functionKey}`;
 
       const resp = await fetch(requestUrl, {

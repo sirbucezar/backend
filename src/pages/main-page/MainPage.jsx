@@ -61,15 +61,15 @@ const MainPage = () => {
    const [currentRubric, setCurrentRubric] = useState(null);
    const [processingId, setProcessingId] = useState(null);
 
-   const { logs, disconnect } = processingId
-      ? useSocket(processingId)
-      : { logs: [], disconnect: () => {} };
+   // const { logs, disconnect } = processingId
+   //    ? useSocket(processingId)
+   //    : { logs: [], disconnect: () => {} };
 
-   useEffect(() => {
-      if (logs.length > 0) {
-         console.log('Socket Logs:', logs);
-      }
-   }, [logs]);
+   // useEffect(() => {
+   //    if (logs.length > 0) {
+   //       console.log('Socket Logs:', logs);
+   //    }
+   // }, [logs]);
 
    const [rubrics, setRubrics] = useState([
       {
