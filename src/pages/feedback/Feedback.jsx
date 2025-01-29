@@ -415,7 +415,7 @@ const Feedback = ({ feedbackData, isFeedback, currentRubric }) => {
 
                {/* Render stage cards */}
                {/* {!!analysisData && } */}
-               <Stages stageEntries={analysisData.feedback} />
+               <Stages currentRubric={currentRubric} stageEntries={analysisData.feedback} />
                <div className={s.feedback__bottom}>
                   <Link to="/" className={s.feedback__btnNew}>
                      New analysis

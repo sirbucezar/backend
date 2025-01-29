@@ -17,7 +17,7 @@ const BorderSnakeAnimation = ({ color, isExpanded }) => {
    );
 };
 
-const Stages = ({ stageEntries }) => {
+const Stages = ({ stageEntries, currentRubric }) => {
    const [expandedStage, setExpandedStage] = useState(null);
    const [isFullyExpanded, setIsFullyExpanded] = useState(false);
    const [animateStages, setAnimateStages] = useState(false);
@@ -263,7 +263,7 @@ const Stages = ({ stageEntries }) => {
                                     muted
                                     playsInline
                                     loop
-                                    src={`/video/stages${expandedStage}/${expandedStage + 1}.mp4`}
+                                    src={`/video/stages2/${expandedStage + 1}.mp4`}
                                     className={s.stages__video}
                                  />
                               </div>
