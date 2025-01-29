@@ -250,7 +250,7 @@ const Feedback = ({ feedbackData, isFeedback, currentRubric }) => {
             <div className={s.feedback}>
                <div className={s.feedback__top}>
                   <h1 className={s.feedback__title}>Rubric: {currentRubric.name}</h1>
-                  <div className={s.feedback__score}>4/5</div>
+                  <div className={s.feedback__score}>3.5/5</div>
                </div>
 
                {/* Render stage cards */}
