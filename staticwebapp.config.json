@@ -5,9 +5,10 @@
       "headers": {
         "Content-Security-Policy": "default-src 'self' blob:; connect-src 'self' blob: https://dotnet-funcapp.azurewebsites.net https://athleticstorage2.blob.core.windows.net https://unpkg.com https://www.gstatic.com; script-src 'self' 'unsafe-eval' blob: https://www.gstatic.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://www.gstatic.com;",
           
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-        "Access-Control-Allow-Headers": "Content-Type, Authorization",
+        "Access-Control-Allow-Origin": "https://witty-pebble-03a588403.4.azurestaticapps.net",
+        "Access-Control-Allow-Methods": "GET, PUT, POST, OPTIONS, DELETE",
+        "Access-Control-Allow-Headers": "Content-Type, Authorization, x-ms-*",
+        "Access-Control-Expose-Headers": "x-ms-*",
 
         "Strict-Transport-Security": "max-age=31536000; includeSubDomains; preload",
         "X-Content-Type-Options": "nosniff",
