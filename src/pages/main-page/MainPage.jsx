@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Routes, Route } from 'react-router';
 import TopBar from './top-bar/TopBar.jsx';
 import NewAnalysis from '../new-analysis/NewAnalysis.jsx';
@@ -7,11 +7,70 @@ import Search from '../search/Search.jsx';
 import Feedback from '../feedback/Feedback.jsx';
 import s from './styles.module.scss';
 import { Toaster } from 'sonner';
+import { io } from 'socket.io-client';
+
+const SOCKET_SERVER_URL = 'https://dotnet-funcapp.azurewebsites.net'; // Adjust if needed
+
+const useSocket = (processingId) => {
+   const [logs, setLogs] = useState([]);
+   const socketRef = useRef(null);
+
+   useEffect(() => {
+      if (!processingId) return;
+
+      console.log(`🔌 Connecting to WebSocket for Processing ID: ${processingId}`);
+
+      socketRef.current = io(SOCKET_SERVER_URL, {
+         path: `/api/status/${processingId}`,
+         transports: ['websocket'],
+      });
+
+      socketRef.current.on('log_update', (log) => {
+         setLogs((prevLogs) => [...prevLogs, log]);
+      });
+
+      socketRef.current.on('connect_error', (err) => {
+         console.error('WebSocket Connection Error:', err);
+      });
+
+      return () => {
+         console.log('🛑 Disconnecting WebSocket');
+         if (socketRef.current) {
+            socketRef.current.disconnect();
+            socketRef.current = null;
+         }
+      };
+   }, [processingId]);
+
+   // ✅ Function to manually disconnect WebSocket
+   const disconnect = () => {
+      if (socketRef.current) {
+         console.log('🚫 Manually Disconnecting WebSocket');
+         socketRef.current.disconnect();
+         socketRef.current = null;
+      }
+   };
+
+   return { logs, disconnect };
+};
 
 const MainPage = () => {
    const [showVideoEditor, setShowVideoEditor] = useState(false);
-   const [isFeedback, setIsFeedback] = useState(true);
+   const [isFeedback, setIsFeedback] = useState(false);
    const [feedbackData, setFeedbackData] = useState(null);
+   const [currentRubric, setCurrentRubric] = useState(null);
+   const [processingId, setProcessingId] = useState(null);
+
+   const { logs, disconnect } = processingId
+      ? useSocket(processingId)
+      : { logs: [], disconnect: () => {} };
+
+   useEffect(() => {
+      if (logs.length > 0) {
+         console.log('Socket Logs:', logs);
+      }
+   }, [logs]);
+
    const [rubrics, setRubrics] = useState([
       {
          id: 0,
@@ -194,18 +253,22 @@ const MainPage = () => {
                               showVideoEditor={showVideoEditor}
                               setShowVideoEditor={setShowVideoEditor}
                               rubrics={rubrics}
+                              currentRubric={currentRubric}
+                              setCurrentRubric={setCurrentRubric}
+                              setProcessingId={setProcessingId}
                            />
                         </>
                      }
                   />
                   <Route path="/search" element={<Search />} />
                   <Route
-                     path="/feedback/"
+                     path="/feedback"
                      element={
                         <Feedback
                            feedbackData={feedbackData}
                            isFeedback={isFeedback}
                            rubrics={rubrics}
+                           currentRubric={currentRubric}
                         />
                      }
                   />

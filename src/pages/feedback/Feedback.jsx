@@ -5,11 +5,21 @@ import s from './styles.module.scss';
 import LoadingScreen from './loading-screen/LoadingScreen';
 import { Link } from 'react-router';
 
-const Feedback = ({ feedbackData, isFeedback }) => {
+const Feedback = ({ feedbackData, isFeedback, currentRubric }) => {
    let navigate = useNavigate();
    // For now, let's just keep dummy data in state
    const [isLoading, setIsLoading] = useState(true);
+   const [isLoadingShown, setIsLoadingShown] = useState(true);
+   const [isExploding, setIsExploding] = useState(false);
    const [analysisData, setAnalysisData] = useState(null);
+
+   useEffect(() => {
+      if (isExploding) {
+         setTimeout(() => {
+            setIsLoadingShown(false);
+         }, 500);
+      }
+   }, [isExploding]);
 
    useEffect(() => {
       if (!isFeedback) {
@@ -177,24 +187,22 @@ const Feedback = ({ feedbackData, isFeedback }) => {
             ],
          };
 
-         // setAnalysisData(dummyResponse);
-         // setIsLoading(false);
-      }, 1200);
+         setAnalysisData(dummyResponse);
+         setIsLoading(false);
+      }, 4000);
 
       console.log('Server says:', analysisData);
    }, []);
 
-   if (isLoading) {
-      return (
-         <div className={s.loading}>
-            <LoadingScreen />
-         </div>
-      );
-   }
+   // if (isLoading) {
+   //    return (
 
-   if (!analysisData) {
-      return <div className={s.error}>Could not find analysis data.</div>;
-   }
+   //    );
+   // }
+
+   // if (!analysisData) {
+   //    return;
+   // }
 
    // useEffect(() => {}, [analysisData]);
 
@@ -210,23 +218,53 @@ const Feedback = ({ feedbackData, isFeedback }) => {
    //    //    confidence: stageAnalysis[stageKey]?.confidence,
    //    // }));
 
-   return (
-      <div className={s.feedback}>
-         <div className={s.feedback__top}>
-            <h1 className={s.feedback__title}>Rubric: Shot Put</h1>
-            <div className={s.feedback__score}>4/5</div>
-         </div>
+   useEffect(() => {
+      // Warn user before leaving page (only before form submission)
+      const handleBeforeUnload = (event) => {
+         if (isFeedback) {
+            event.preventDefault();
+            event.returnValue = ''; // Standard browser behavior
+         }
+      };
 
-         {/* Render stage cards */}
-         {/* {!!analysisData && } */}
-         <Stages stageEntries={analysisData.feedback} />
-         <div className={s.feedback__bottom}>
-            <Link to="/" className={s.feedback__btnNew}>
-               New analysis
-            </Link>
-            <button className={s.feedback__btn}>Download report</button>
-         </div>
-      </div>
+      window.addEventListener('beforeunload', handleBeforeUnload);
+
+      return () => {
+         window.removeEventListener('beforeunload', handleBeforeUnload);
+      };
+   }, [isFeedback]);
+
+   return (
+      <>
+         {isLoadingShown && (
+            <div className={s.loading}>
+               <LoadingScreen
+                  isExploding={isExploding}
+                  setIsExploding={setIsExploding}
+                  isLoading={isLoading}
+                  currentRubric={currentRubric}
+               />
+            </div>
+         )}
+         {!isLoading && (
+            <div className={s.feedback}>
+               <div className={s.feedback__top}>
+                  <h1 className={s.feedback__title}>Rubric: {currentRubric.name}</h1>
+                  <div className={s.feedback__score}>4/5</div>
+               </div>
+
+               {/* Render stage cards */}
+               {/* {!!analysisData && } */}
+               <Stages stageEntries={analysisData.feedback} />
+               <div className={s.feedback__bottom}>
+                  <Link to="/" className={s.feedback__btnNew}>
+                     New analysis
+                  </Link>
+                  <button className={s.feedback__btn}>Download report</button>
+               </div>
+            </div>
+         )}
+      </>
    );
 };
 

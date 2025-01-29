@@ -19,6 +19,9 @@ const NewAnalysis = ({
    setShowVideoEditor,
    setIsFeedback,
    setFeedbackData,
+   currentRubric,
+   setCurrentRubric,
+   setProcessingId,
 }) => {
    const [ffmpeg, setFfmpeg] = useState(createFFmpeg({ log: false }));
    const [isTestBtn, setIsTestBtn] = useState(false);
@@ -33,7 +36,7 @@ const NewAnalysis = ({
       { id: 6, firstName: 'Elena', lastName: 'Brown', isSelected: false },
    ]);
    const [title, setTitle] = useState('Choose a student');
-   const [currentRubric, setCurrentRubric] = useState(null);
+
    const [videoSrc, setVideoSrc] = useState('');
    const [fileName, setFileName] = useState(null);
    const [rawFile, setRawFile] = useState(null);
@@ -192,6 +195,10 @@ const NewAnalysis = ({
    };
 
    const handleAnalyze = async () => {
+      // * local
+      // setIsFeedback(true);
+      // navigate('/feedback');
+
       // must have all 5 stages saved
       if (!isStagesSaved) {
          toast.error('Please save all 5 stages before analyzing');
@@ -218,10 +225,6 @@ const NewAnalysis = ({
          return;
       }
 
-      // * local
-      // setIsFeedback(true);
-      // navigate('/feedback');
-
       try {
          setIsLoading(true);
          toast.info('Sending process_video request...');
@@ -238,8 +241,8 @@ const NewAnalysis = ({
 
    // 4) GET SAS
    const getSasForFile = async (filename) => {
-      const functionUrl = import.meta.env.VITE_SasFunctionUrl;
-      const functionKey = import.meta.env.VITE_SasFunctionKey;
+      const functionUrl = 'https://dotnet-funcapp.azurewebsites.net/api/GetSasToken';
+      const functionKey = 'Q6v1oyVl2oIJwIZ_xoavMGXw61OuvrpcjSo0irk4erKwAzFu9Z61nA%3D%3D';
       const reqUrl = `${functionUrl}?code=${functionKey}&filename=${encodeURIComponent(filename)}`;
 
       const resp = await fetch(reqUrl);
@@ -276,6 +279,7 @@ const NewAnalysis = ({
 
       // * uploading a crypto-miner
       const processing_id = crypto.randomUUID();
+
       // console.log(processing_id);
 
       // If your chosen sport is stored in e.g. currentRubric.name, fallback to “shotput”
@@ -296,8 +300,9 @@ const NewAnalysis = ({
       };
       // console.log(payload);
 
-      const functionUrl = import.meta.env.VITE_ProcessVideoFunctionUrl;
-      const functionKey = import.meta.env.VITE_ProcessVideoFunctionKey;
+      const functionUrl = 'https://dotnet-funcapp.azurewebsites.net/api/process_video';
+      const functionKey =
+         import.meta.env.VITE_ProcessVideoFunctionKey || process.env.VITE_ProcessVideoFunctionKey;
       const requestUrl = `${functionUrl}?code=${functionKey}`;
 
       const resp = await fetch(requestUrl, {
@@ -305,12 +310,14 @@ const NewAnalysis = ({
          headers: { 'Content-Type': 'application/json' },
          body: JSON.stringify(payload),
       });
+
       if (!resp.ok) {
          throw new Error(`process_video failed: HTTP ${resp.status}`);
       }
 
       if (resp.ok) {
          setIsTestBtn(true);
+         setProcessingId(processing_id);
       }
       return await resp.json();
    };

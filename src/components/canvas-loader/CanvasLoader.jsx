@@ -5,9 +5,9 @@ import s from './styles.module.scss';
 const CanvasLoader = () => {
    const { progress } = useProgress();
 
-   useEffect(() => {
-      console.log(progress);
-   }, [progress]);
+   // useEffect(() => {
+   //    console.log(progress);
+   // }, [progress]);
 
    return (
       <Html as="div" fullscreen>

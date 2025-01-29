@@ -154,12 +154,9 @@ const Overview = () => {
                         // rotation={[x.rotationX, x.rotationY, x.rotationZ]}
                         // position={[0, 0, 0]}
                         // rotation={[0, -Math.PI / 2.0, 0]}
-                        // scale={0.5}
-                        // position={[0, -40, -10]}
-                        // rotation={[-3.3, -1.9, -3.3]}
-                        scale={sizes.deskScale}
-                        position={sizes.deskPosition}
-                        rotation={[0.1, -Math.PI, 0]}
+                        scale={0.5}
+                        position={[0, -40, -10]}
+                        rotation={[-3.3, -1.9, -3.3]}
                      />
                   </HeroCamera>
                   <ambientLight intensity={1} />

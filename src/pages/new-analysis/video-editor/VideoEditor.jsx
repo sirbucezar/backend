@@ -57,7 +57,7 @@ const VideoEditor = ({
       const newRubric = { ...rubric, stages: newStages };
       toast.success(`Stage ${currentStage + 1} was saved!`);
 
-      console.log(newStages);
+      // console.log(newStages);
 
       let rubricSaved = 0;
       let nextStage = NaN;
@@ -377,11 +377,9 @@ const VideoEditor = ({
       if (type === 'start') {
          setIsDraggingStart(true);
          setLastChange('start');
-         // console.log('set start');
       } else if (type === 'end') {
          setIsDraggingEnd(true);
          setLastChange('end');
-         // console.log('set end');
       }
    };
 
