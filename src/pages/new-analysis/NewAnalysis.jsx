@@ -263,6 +263,7 @@ const NewAnalysis = ({
             'Access-Control-Allow-Origin': '*',
          },
          body: file,
+         mode: 'cors',
       });
       if (!resp.ok) {
          throw new Error(`Blob upload failed: HTTP ${resp.status}`);
