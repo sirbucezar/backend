@@ -263,7 +263,7 @@ const Stages = ({ stageEntries }) => {
                                     muted
                                     playsInline
                                     loop
-                                    src={`/video/stages/${expandedStage + 1}.mp4`}
+                                    src={`/video/stages${expandedStage}/${expandedStage + 1}.mp4`}
                                     className={s.stages__video}
                                  />
                               </div>

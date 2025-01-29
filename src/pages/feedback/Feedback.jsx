@@ -187,7 +187,167 @@ const Feedback = ({ feedbackData, isFeedback, currentRubric }) => {
             ],
          };
 
-         setAnalysisData(dummyResponse);
+         const dummyResponse2 = {
+            status: 'Augmentation successful',
+            processing_id: '422',
+            feedback: [
+               {
+                  stage: 'Start - Stage1',
+                  criterion: 'Explosive push-off from blocks',
+                  score: '1',
+                  confidence: '0.88',
+                  feedback: {
+                     Observation: {
+                        title: 'Observation',
+                        body: 'Your start is strong, with an explosive push-off and good reaction time.',
+                     },
+                     'Improvement Suggestion': {
+                        title: 'Improvement Suggestion',
+                        body: 'Maintain your drive phase longer to optimize acceleration.',
+                     },
+                     Justification: {
+                        title: 'Justification',
+                        body: 'A powerful push-off generates the necessary speed to transition smoothly into the sprint.',
+                     },
+                     Encouragement: {
+                        title: 'Encouragement',
+                        body: 'Great start—your explosiveness sets the foundation for a fast sprint!',
+                     },
+                  },
+                  injury_risk: {
+                     high_risk: false,
+                     disclaimer:
+                        'No significant injury risk noted. Continue executing with precision.',
+                  },
+                  visualization_tip:
+                     'Picture yourself launching like a rocket, pushing the track behind you.',
+               },
+               {
+                  stage: 'Start - Stage2',
+                  criterion: 'First step length and angle',
+                  score: '0',
+                  confidence: '0.72',
+                  feedback: {
+                     Observation: {
+                        title: 'Observation',
+                        body: 'Your first step is too short, causing inefficient acceleration.',
+                     },
+                     'Improvement Suggestion': {
+                        title: 'Improvement Suggestion',
+                        body: 'Work on extending your first stride while keeping a low drive angle.',
+                     },
+                     Justification: {
+                        title: 'Justification',
+                        body: 'A well-extended first step ensures optimal force application and seamless momentum buildup.',
+                     },
+                     Encouragement: {
+                        title: 'Encouragement',
+                        body: 'Keep at it—adjusting this step will drastically improve your acceleration phase!',
+                     },
+                  },
+                  injury_risk: {
+                     high_risk: false,
+                     disclaimer: 'Minor risk of strain if overextending. Maintain proper balance.',
+                  },
+                  visualization_tip:
+                     'Imagine stepping over a hurdle just beyond the blocks to encourage full leg extension.',
+               },
+               {
+                  stage: 'Start - Stage3',
+                  criterion: 'Arm drive synchronization',
+                  score: '1',
+                  confidence: '0.91',
+                  feedback: {
+                     Observation: {
+                        title: 'Observation',
+                        body: 'Your arm drive is powerful and well-coordinated with your lower body.',
+                     },
+                     'Improvement Suggestion': {
+                        title: 'Improvement Suggestion',
+                        body: 'Continue emphasizing a strong arm pump to maximize forward momentum.',
+                     },
+                     Justification: {
+                        title: 'Justification',
+                        body: 'Efficient arm drive enhances stability and contributes to overall acceleration.',
+                     },
+                     Encouragement: {
+                        title: 'Encouragement',
+                        body: 'Awesome arm mechanics—this is helping you generate extra speed!',
+                     },
+                  },
+                  injury_risk: {
+                     high_risk: false,
+                     disclaimer: 'No injury risk detected. Keep focusing on fluid movement.',
+                  },
+                  visualization_tip:
+                     'Think of your arms pulling the track behind you as you sprint forward.',
+               },
+               {
+                  stage: 'Start - Stage4',
+                  criterion: 'Head and torso alignment',
+                  score: '1',
+                  confidence: '0.87',
+                  feedback: {
+                     Observation: {
+                        title: 'Observation',
+                        body: 'Your head remains neutral, and your torso leans forward at an ideal angle.',
+                     },
+                     'Improvement Suggestion': {
+                        title: 'Improvement Suggestion',
+                        body: 'Sustain this posture throughout the drive phase for optimal acceleration.',
+                     },
+                     Justification: {
+                        title: 'Justification',
+                        body: 'A forward-leaning torso helps maintain momentum and reduces aerodynamic resistance.',
+                     },
+                     Encouragement: {
+                        title: 'Encouragement',
+                        body: 'Excellent posture—keeping this form will help you reach top speed efficiently!',
+                     },
+                  },
+                  injury_risk: {
+                     high_risk: false,
+                     disclaimer:
+                        'No injury risk detected. Maintain this posture as speed increases.',
+                  },
+                  visualization_tip:
+                     'Visualize yourself leaning into the race, using gravity to propel forward.',
+               },
+               {
+                  stage: 'Start - Stage5',
+                  criterion: 'Transition into upright sprinting',
+                  score: '1',
+                  confidence: '0.92',
+                  feedback: {
+                     Observation: {
+                        title: 'Observation',
+                        body: 'Your transition from acceleration to upright sprinting is seamless and controlled.',
+                     },
+                     'Improvement Suggestion': {
+                        title: 'Improvement Suggestion',
+                        body: 'Maintain gradual progression to full sprint posture to maximize speed retention.',
+                     },
+                     Justification: {
+                        title: 'Justification',
+                        body: 'A smooth transition prevents deceleration and allows peak velocity to be sustained.',
+                     },
+                     Encouragement: {
+                        title: 'Encouragement',
+                        body: 'Fantastic transition—you are setting yourself up for a strong finish!',
+                     },
+                  },
+                  injury_risk: {
+                     high_risk: false,
+                     disclaimer:
+                        'No injury risk detected. Continue refining this phase for optimal results.',
+                  },
+                  visualization_tip:
+                     'Imagine yourself smoothly rising from a crouched acceleration phase into a full-speed sprint.',
+               },
+            ],
+         };
+
+         setAnalysisData(currentRubric.id === 2 ? dummyResponse : dummyResponse2);
          setIsLoading(false);
       }, 4000);
 
@@ -250,7 +410,7 @@ const Feedback = ({ feedbackData, isFeedback, currentRubric }) => {
             <div className={s.feedback}>
                <div className={s.feedback__top}>
                   <h1 className={s.feedback__title}>Rubric: {currentRubric.name}</h1>
-                  <div className={s.feedback__score}>3.5/5</div>
+                  <div className={s.feedback__score}>{currentRubric.id === 2 ? 3.5 : 4}/5</div>
                </div>
 
                {/* Render stage cards */}
