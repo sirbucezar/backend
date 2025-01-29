@@ -58,6 +58,7 @@ const MainPage = () => {
    const [showVideoEditor, setShowVideoEditor] = useState(false);
    const [isFeedback, setIsFeedback] = useState(false);
    const [feedbackData, setFeedbackData] = useState(null);
+   // const [currentRubric, setCurrentRubric] = useState({ id: 2, name: 'shotup' });
    const [currentRubric, setCurrentRubric] = useState(null);
    const [processingId, setProcessingId] = useState(null);
 

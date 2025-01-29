@@ -231,21 +231,11 @@ const Stages = ({ stageEntries }) => {
                                  <h3 className={s.expandedStage__feedbackTitle}>Feedback:</h3>
                                  <div className={s.expandedStage__feedbackText}>
                                     <div className={s.expandedStage__feedbackItem}>
-                                       <div className={s.expandedStage__feedbackItemTitle}>
-                                          {stageEntries[expandedStage].feedback.Observation.title}
-                                       </div>
                                        <div className={s.expandedStage__feedbackItemDescr}>
                                           {stageEntries[expandedStage].feedback.Observation.body}
                                        </div>
                                     </div>
                                     <div className={s.expandedStage__feedbackItem}>
-                                       <div className={s.expandedStage__feedbackItemTitle}>
-                                          {
-                                             stageEntries[expandedStage].feedback[
-                                                'Improvement Suggestion'
-                                             ].title
-                                          }
-                                       </div>
                                        <div className={s.expandedStage__feedbackItemDescr}>
                                           {
                                              stageEntries[expandedStage].feedback[
@@ -255,17 +245,11 @@ const Stages = ({ stageEntries }) => {
                                        </div>
                                     </div>
                                     <div className={s.expandedStage__feedbackItem}>
-                                       <div className={s.expandedStage__feedbackItemTitle}>
-                                          {stageEntries[expandedStage].feedback.Justification.title}
-                                       </div>
                                        <div className={s.expandedStage__feedbackItemDescr}>
                                           {stageEntries[expandedStage].feedback.Justification.body}
                                        </div>
                                     </div>
                                     <div className={s.expandedStage__feedbackItem}>
-                                       <div className={s.expandedStage__feedbackItemTitle}>
-                                          {stageEntries[expandedStage].feedback.Encouragement.title}
-                                       </div>
                                        <div className={s.expandedStage__feedbackItemDescr}>
                                           {stageEntries[expandedStage].feedback.Encouragement.body}
                                        </div>
@@ -279,7 +263,7 @@ const Stages = ({ stageEntries }) => {
                                     muted
                                     playsInline
                                     loop
-                                    src={ExampleSrc}
+                                    src={`/video/stages/${expandedStage + 1}.mp4`}
                                     className={s.stages__video}
                                  />
                               </div>

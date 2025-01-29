@@ -31,89 +31,89 @@ const Feedback = ({ feedbackData, isFeedback, currentRubric }) => {
       setTimeout(() => {
          const dummyResponse = {
             status: 'Augmentation successful',
-            processing_id: '420',
+            processing_id: '421',
             feedback: [
                {
                   stage: 'Shot Put - Stage1',
                   criterion: 'Glide phase initiated with bent low leg, back to throw',
                   score: '1',
-                  confidence: '0.2',
+                  confidence: '0.90',
                   feedback: {
                      Observation: {
                         title: 'Observation',
-                        body: 'Your starting stance is stable and well-aligned.',
+                        body: 'Your low leg remains properly bent, creating an explosive, controlled glide backward.',
                      },
                      'Improvement Suggestion': {
                         title: 'Improvement Suggestion',
-                        body: 'Practice maintaining this stance under varying conditions.',
+                        body: 'Maintain that approach; add plyometric exercises to further enhance your starting leg power.',
                      },
                      Justification: {
                         title: 'Justification',
-                        body: 'A consistent stance ensures power generation and prevents balance loss.',
+                        body: 'A sustained bend optimizes hip-knee-ankle alignment, driving a powerful transition into the power stance.',
                      },
                      Encouragement: {
                         title: 'Encouragement',
-                        body: 'Great start\u2014keep this stability consistent!',
+                        body: 'Great setup—keeping that leg flexed at the start is fueling a dynamic glide every time.',
                      },
                   },
                   injury_risk: {
                      high_risk: false,
-                     disclaimer: 'No significant injury risk noted. Warm up thoroughly.',
+                     disclaimer: 'No significant injury risk noted. Keep executing with control.',
                   },
-                  visualization_tip: 'Imagine your lower body as a solid foundation for the throw.',
+                  visualization_tip:
+                     'Imagine storing power in your bent leg like a compressed spring before pushing off.',
                },
                {
                   stage: 'Shot Put - Stage2',
                   criterion: 'Trailing leg pulled under pelvis after hop',
                   score: '0.5',
-                  confidence: '0.75',
+                  confidence: '0.74',
                   feedback: {
                      Observation: {
                         title: 'Observation',
-                        body: 'The trailing leg was not fully aligned under the pelvis.',
+                        body: 'You sometimes manage to tuck the trailing leg under, but it’s inconsistent and timing varies.',
                      },
                      'Improvement Suggestion': {
                         title: 'Improvement Suggestion',
-                        body: 'Focus on drills that emphasize leg alignment during the hop.',
+                        body: 'Use rhythmic drills: hop and count ‘one-two,’ ensuring the leg tucks under on ‘two’ every time.',
                      },
                      Justification: {
                         title: 'Justification',
-                        body: 'Aligning the trailing leg helps transfer power more efficiently.',
+                        body: 'Consistent leg tuck helps you land in a strong power position, stabilizing your body for the put.',
                      },
                      Encouragement: {
                         title: 'Encouragement',
-                        body: 'Almost there! Just a little more focus on leg positioning.',
+                        body: 'You’re halfway there—sharpen that timing, and the rest of the throw will feel smoother.',
                      },
                   },
                   injury_risk: {
                      high_risk: false,
-                     disclaimer:
-                        'Minor risk of strain if misalignment continues. Focus on proper form.',
+                     disclaimer: 'Minor risk of imbalance. Focus on controlled foot placement.',
                   },
                   visualization_tip:
-                     'Visualize your legs forming a straight line during the hop phase.',
+                     'Visualize snapping your trailing foot underneath like a pendulum swinging into place.',
                },
                {
                   stage: 'Shot Put - Stage3',
                   criterion: 'Bracing leg planted; push leg bent after hop',
                   score: '0',
-                  confidence: '0.6',
+                  confidence: '0.76',
                   feedback: {
                      Observation: {
                         title: 'Observation',
-                        body: 'The bracing leg was not firmly planted, affecting balance.',
+                        body: 'Your front (bracing) leg drifts forward without proper contact, and the push leg remains too straight.',
                      },
                      'Improvement Suggestion': {
                         title: 'Improvement Suggestion',
-                        body: 'Work on drills to strengthen your bracing leg stability.',
+                        body: 'Consciously drive your front foot into the ground; keep your back knee flexed for a stronger drive.',
                      },
                      Justification: {
                         title: 'Justification',
-                        body: 'A planted bracing leg provides stability for a strong push-off.',
+                        body: 'A solid front plant anchors your body, while a bent push leg coils energy for the final extension.',
                      },
                      Encouragement: {
                         title: 'Encouragement',
-                        body: 'Don\u2019t give up\u2014focus on planting that leg consistently!',
+                        body: 'No worries—nailing that front-back leg setup will drastically boost throw consistency.',
                      },
                   },
                   injury_risk: {
@@ -122,7 +122,7 @@ const Feedback = ({ feedbackData, isFeedback, currentRubric }) => {
                         'Improper bracing could strain the knee joint. Proceed with caution.',
                   },
                   visualization_tip:
-                     'Imagine your bracing leg acting like an anchor, holding you steady.',
+                     'Picture your bracing leg as an anchor keeping you grounded while the push leg builds power.',
                },
                {
                   stage: 'Shot Put - Stage4',
@@ -144,7 +144,7 @@ const Feedback = ({ feedbackData, isFeedback, currentRubric }) => {
                      },
                      Encouragement: {
                         title: 'Encouragement',
-                        body: 'Fantastic job\u2014your sequence is setting you up for success!',
+                        body: 'Fantastic job—your sequence is setting you up for success!',
                      },
                   },
                   injury_risk: {
@@ -152,29 +152,29 @@ const Feedback = ({ feedbackData, isFeedback, currentRubric }) => {
                      disclaimer: 'No significant injury risk noted. Keep up the good work!',
                   },
                   visualization_tip:
-                     'Picture the force traveling seamlessly from your hips to your arm.',
+                     'Picture the force traveling seamlessly from your hips to your arm in one fluid motion.',
                },
                {
                   stage: 'Shot Put - Stage5',
-                  criterion: 'Shot remains at neck until 45\u00b0 release',
+                  criterion: 'Shot remains at neck until 45° release',
                   score: '1',
-                  confidence: '0.98',
+                  confidence: '0.90',
                   feedback: {
                      Observation: {
                         title: 'Observation',
-                        body: 'Your release angle was optimal, and the shot stayed in position.',
+                        body: 'You consistently secure the shot at your neck and fire it at a textbook 45°, maximizing distance.',
                      },
                      'Improvement Suggestion': {
                         title: 'Improvement Suggestion',
-                        body: 'Continue practicing release angles to maintain consistency.',
+                        body: 'Keep refining your rhythm—slight changes in hip drive or speed might tweak the release angle perfectly.',
                      },
                      Justification: {
                         title: 'Justification',
-                        body: 'A proper release angle maximizes shot trajectory and distance.',
+                        body: 'A well-timed 45° launch uses gravity and forward velocity for a long flight path with minimal energy loss.',
                      },
                      Encouragement: {
                         title: 'Encouragement',
-                        body: 'Excellent release! Your hard work is paying off.',
+                        body: 'Fantastic work—your shot put form is an excellent blend of power and precision!',
                      },
                   },
                   injury_risk: {
@@ -182,7 +182,7 @@ const Feedback = ({ feedbackData, isFeedback, currentRubric }) => {
                      disclaimer: 'Ensure proper wrist and arm alignment to prevent strain.',
                   },
                   visualization_tip:
-                     'Visualize the shot traveling in a smooth arc towards the target.',
+                     'Visualize the shot traveling in a smooth arc towards the target at a perfect 45° angle.',
                },
             ],
          };
@@ -260,7 +260,7 @@ const Feedback = ({ feedbackData, isFeedback, currentRubric }) => {
                   <Link to="/" className={s.feedback__btnNew}>
                      New analysis
                   </Link>
-                  <button className={s.feedback__btn}>Download report</button>
+                  {/* <button className={s.feedback__btn}>Download report</button> */}
                </div>
             </div>
          )}
