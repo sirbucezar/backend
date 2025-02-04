@@ -31,6 +31,9 @@
       font-size: 26px;
       font-weight: 600;
 
+      @media (max-width: $md1+px){
+         font-size: 24px;
+      }
       @media (max-width: $md2+px){
          font-size: 20px;
       }
@@ -203,6 +206,11 @@
       justify-content: space-between;
       gap: 10px;
       margin: 0px 0px 20px 0px;
+
+      @media (max-width: 600px){
+         flex-direction: column;
+         align-items: flex-start;
+      }
    }
 
    &__submitWrap{
@@ -213,6 +221,14 @@
       align-items: center;
       justify-content: space-between;
       gap: 10px;
+      width: 100%;
+
+      @media (max-width: $md4+px){
+         flex-direction: column;
+         align-items: flex-start;
+         padding: 0;
+         background: transparent;
+      }
    }
 }
 

@@ -1,5 +1,30 @@
 @use '../../../assets/style/global.scss' as *;
 
+.sidebarBg{
+   display: none;
+   position: fixed;
+   top: 0;
+   right: 0;
+   width: 100%;
+   height: 100%;
+   background: rgba(0, 0, 0, 0.7);
+   z-index: 1001;
+   opacity: 0;
+   visibility: hidden;
+   transition: all .3s ease-in-out;
+   transform: translateX(100%);
+
+   &.active{
+      opacity: 1;
+      visibility: visible;
+      transform: translateX(0%);
+   }
+
+   @media (max-width: $md2+px){
+      display: block;
+   }
+}
+
 .sidebar {
    position: fixed;
    top: 0;
@@ -10,13 +35,29 @@
    // display: flex;
    // justify-content: center;
    // align-items: center;
-   padding: 10px 0;
+   
    height: 100%;
    z-index: 1000;
+   transition: all .3s ease-in-out;
 
    @media (max-width: $md1+px){
       left: 0;
       width: 170px;
+   }
+
+   @media (max-width: $md2+px){
+      transform: translateX(-100%);
+      background: rgb(20 19 19);
+      padding: 70px 0 0 0;
+   }
+   @media (max-width: 600px){
+      padding: 60px 0 0 0;
+   }
+
+   &.show{
+      @media (max-width: $md2+px){
+         transform: translateX(0%);
+      }
    }
 
    &__wrapper {

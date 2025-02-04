@@ -349,7 +349,7 @@ const Feedback = ({ feedbackData, isFeedback, currentRubric }) => {
 
          setAnalysisData(currentRubric.id === 2 ? dummyResponse : dummyResponse2);
          setIsLoading(false);
-      }, 4000);
+      }, 10000);
 
       console.log('Server says:', analysisData);
    }, []);

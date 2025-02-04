@@ -28,6 +28,8 @@ const ChooseStudent = ({ students, setStudents, setSelectedStudent, title, setTi
          setSearchTerm('');
          setNewStudentIsDropdownOpen(false);
          toast.success(`Student ${firstName.trim()} ${lastName.trim()} was added!`);
+      } else {
+         toast.error('Fill in first and last name');
       }
    };
 

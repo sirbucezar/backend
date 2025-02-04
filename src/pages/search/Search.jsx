@@ -48,7 +48,7 @@ const Search = () => {
                   </div>
                   <input
                      type="text"
-                     placeholder="Search... with AI"
+                     placeholder="Search with AI"
                      value={searchTerm}
                      onChange={(e) => setSearchTerm(e.target.value)}
                   />

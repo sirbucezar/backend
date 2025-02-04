@@ -8,6 +8,7 @@ import Feedback from '../feedback/Feedback.jsx';
 import s from './styles.module.scss';
 import { Toaster } from 'sonner';
 import { io } from 'socket.io-client';
+import Header from './header/Header.jsx';
 
 const SOCKET_SERVER_URL = 'https://dotnet-funcapp.azurewebsites.net'; // Adjust if needed
 
@@ -56,11 +57,12 @@ const useSocket = (processingId) => {
 
 const MainPage = () => {
    const [showVideoEditor, setShowVideoEditor] = useState(false);
-   const [isFeedback, setIsFeedback] = useState(false);
+   const [isFeedback, setIsFeedback] = useState(true);
    const [feedbackData, setFeedbackData] = useState(null);
    // const [currentRubric, setCurrentRubric] = useState({ id: 2, name: 'shotup' });
    const [currentRubric, setCurrentRubric] = useState(null);
    const [processingId, setProcessingId] = useState(null);
+   const [isSidebarShow, setIsSidebarShow] = useState(false);
 
    // const { logs, disconnect } = processingId
    //    ? useSocket(processingId)
@@ -247,6 +249,10 @@ const MainPage = () => {
                      path="/"
                      element={
                         <>
+                           <Header
+                              isSidebarShow={isSidebarShow}
+                              setIsSidebarShow={setIsSidebarShow}
+                           />
                            {!showVideoEditor && <TopBar />}
                            <NewAnalysis
                               setFeedbackData={setFeedbackData}
@@ -257,6 +263,8 @@ const MainPage = () => {
                               currentRubric={currentRubric}
                               setCurrentRubric={setCurrentRubric}
                               setProcessingId={setProcessingId}
+                              isSidebarShow={isSidebarShow}
+                              setIsSidebarShow={setIsSidebarShow}
                            />
                         </>
                      }

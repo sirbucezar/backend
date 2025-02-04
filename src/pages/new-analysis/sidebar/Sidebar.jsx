@@ -12,7 +12,7 @@ import sprint from '/icons/sprint.svg';
 import startTecchnique from '/icons/start tecchnique.svg';
 import { toast } from 'sonner';
 
-const Sidebar = ({ rubrics, currentRubric, setCurrentRubric }) => {
+const Sidebar = ({ rubrics, currentRubric, setCurrentRubric, isSidebarShow, setIsSidebarShow }) => {
    const iconsSvg = [
       startTecchnique,
       sprint,
@@ -25,9 +25,12 @@ const Sidebar = ({ rubrics, currentRubric, setCurrentRubric }) => {
       relayRace,
    ];
 
+   const sidebarRef = useRef(null);
+   const sidebarBgRef = useRef(null);
    const dockRef = useRef(null);
    const iconRefs = useRef([]);
    const [isHeightExceeded, setIsHeightExceeded] = useState(false);
+   const [sidebarWidth, setSidebarWidth] = useState(0);
 
    useEffect(() => {
       const icons = iconRefs.current;
@@ -118,36 +121,67 @@ const Sidebar = ({ rubrics, currentRubric, setCurrentRubric }) => {
       };
    }, [isHeightExceeded]);
 
+   useEffect(() => {
+      const updateSidebarWidth = () => {
+         if (sidebarRef.current && sidebarBgRef.current) {
+            const sidebarW = sidebarRef.current.offsetWidth;
+            setSidebarWidth(sidebarW);
+            sidebarBgRef.current.style.width = `calc(100% - ${sidebarW}px)`;
+         }
+      };
+
+      // Initial set
+      updateSidebarWidth();
+
+      // Update width on resize
+      window.addEventListener('resize', updateSidebarWidth);
+
+      return () => {
+         window.removeEventListener('resize', updateSidebarWidth);
+      };
+   }, []);
+
    const handleRubricClick = (rubric) => {
       setCurrentRubric(rubric);
       toast.success(`Rubric ${rubric.name}`);
+      setIsSidebarShow(false);
+   };
+
+   const closeSidebar = () => {
+      setIsSidebarShow(false);
    };
 
    return (
-      <div className={s.sidebar}>
-         <div className={`${s.sidebar__wrapper} ${isHeightExceeded ? s.scroll : ''}`}>
-            <ul className={s.sidebar__toolbar} ref={dockRef}>
-               {iconsSvg.map((icon, index) => (
-                  <li
-                     key={index}
-                     onClick={() =>
-                        handleRubricClick({ id: rubrics[index].id, name: rubrics[index].name })
-                     }
-                     className={`${s.sidebar__item} ${
-                        iconRefs.current[index]?.classList.contains(s.show) ? s.show : ''
-                     } ${
-                        iconRefs.current[index]?.classList.contains(s.inactive) ? s.inactive : ''
-                     } ${currentRubric?.id === rubrics[index].id ? s.active : ''}`}
-                     ref={(el) => (iconRefs.current[index] = el)}>
-                     <div className={s.sidebar__icon}>
-                        <img src={icon} alt={`icon-${index}`} />
-                     </div>
-                     <div className={s.sidebar__title}>{rubrics[index].name}</div>
-                  </li>
-               ))}
-            </ul>
+      <>
+         <div
+            className={`${s.sidebarBg} ${isSidebarShow ? s.active : ''}`}
+            ref={sidebarBgRef}
+            onClick={closeSidebar}></div>
+         <div className={`${s.sidebar} ${isSidebarShow ? s.show : ''}`} ref={sidebarRef}>
+            <div className={`${s.sidebar__wrapper} ${isHeightExceeded ? s.scroll : ''}`}>
+               <ul className={s.sidebar__toolbar} ref={dockRef}>
+                  {iconsSvg.map((icon, index) => (
+                     <li
+                        key={index}
+                        onClick={() =>
+                           handleRubricClick({ id: rubrics[index].id, name: rubrics[index].name })
+                        }
+                        className={`${s.sidebar__item} ${
+                           iconRefs.current[index]?.classList.contains(s.show) ? s.show : ''
+                        } ${
+                           iconRefs.current[index]?.classList.contains(s.inactive) ? s.inactive : ''
+                        } ${currentRubric?.id === rubrics[index].id ? s.active : ''}`}
+                        ref={(el) => (iconRefs.current[index] = el)}>
+                        <div className={s.sidebar__icon}>
+                           <img src={icon} alt={`icon-${index}`} />
+                        </div>
+                        <div className={s.sidebar__title}>{rubrics[index].name}</div>
+                     </li>
+                  ))}
+               </ul>
+            </div>
          </div>
-      </div>
+      </>
    );
 };
 

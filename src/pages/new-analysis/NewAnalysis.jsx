@@ -22,6 +22,8 @@ const NewAnalysis = ({
    currentRubric,
    setCurrentRubric,
    setProcessingId,
+   isSidebarShow,
+   setIsSidebarShow,
 }) => {
    const [ffmpeg, setFfmpeg] = useState(createFFmpeg({ log: false }));
    const [isTestBtn, setIsTestBtn] = useState(false);
@@ -414,6 +416,8 @@ const NewAnalysis = ({
                currentRubric={currentRubric}
                setCurrentRubric={setCurrentRubric}
                rubrics={rubrics}
+               isSidebarShow={isSidebarShow}
+               setIsSidebarShow={setIsSidebarShow}
             />
          )}
          <div className={s.newAnalysis__main}>

@@ -5,6 +5,8 @@
    //    width: 320px;
    //    flex: 0 0 320px;
    // }
+   position: relative;
+   z-index: 2;
    width: 320px;
    flex: 0 0 320px;
 
@@ -15,9 +17,12 @@
    // @media (max-width: $md3+px){
    //    max-width: 360px;
    // }
-   // @media (max-width: $md4+px){
-   //    max-width: none;
-   // }
+   @media (max-width: 600px){
+      flex: 1 1 auto;
+   }
+   @media (max-width: $md4+px){
+      width: 100%;
+   }
    &__main{
       display: flex;
       align-items: flex-end;

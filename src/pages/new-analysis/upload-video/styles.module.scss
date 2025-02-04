@@ -1,8 +1,15 @@
+@use '../../../assets/style/global.scss' as *;
+
 .uploadVideo{
+   flex: 1 1 auto;
    &__body{
       display: flex;
-      align-items: flex-start;
       gap: 12px;
+
+      @media (max-width: $md4+px){
+         flex-direction: column;
+         // gap: 0;
+      }
    }
    &__title{
       font-weight: 600;
@@ -14,7 +21,11 @@
    &__fileName{
       font-size: 16px;
       color: #eee;
-      margin: 12px 0px 0px 0px;
+      display: flex;
+      align-items: center;
+      overflow: auto;
+      p{
+      }
    }
 }
 
@@ -31,6 +42,7 @@
    font-weight: 600;
    font-size: 18px;
    transition: all .3s ease-in-out;
+   white-space: nowrap;
 
    @media(any-hover: hover){
       &:hover{
